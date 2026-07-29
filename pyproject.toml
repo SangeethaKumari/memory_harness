@@ -1,0 +1,31 @@
+[project]
+name = "memory"
+version = "0.1.0"
+description = "memory"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "svlearn-bootcamp>=0.1.7",
+    "google-adk>=1.0.0",
+    "litellm>=1.60.0,<1.80.0",
+    "nest-asyncio>=1.6.0",
+    "sentence-transformers>=3.0.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+# If you also build sdists and want data included:
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/tests",
+    # ... other includes like README, pyproject.toml, etc.
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/memory"]
