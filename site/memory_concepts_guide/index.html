@@ -1,0 +1,1121 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="memory" name="description"/>
+<meta content="SupportVectors" name="author"/>
+<link href="https://supportvectors.ai/memory/memory_concepts_guide/" rel="canonical"/>
+<link href="../notebooks/05_poisoned_memory_governance/" rel="prev"/>
+<link href="../project-guide/tips-and-tricks/cuda-hell/" rel="next"/>
+<link href="../images/favicon.ico" rel="icon"/>
+<meta content="mkdocs-1.6.1, mkdocs-material-9.7.7" name="generator"/>
+<title>Memory Concepts Guide - SupportVectors memory</title>
+<link href="../assets/stylesheets/main.ec1eaa64.min.css" rel="stylesheet"/>
+<link href="../assets/stylesheets/palette.ab4e12ef.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Lora:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback" rel="stylesheet"/>
+<style>:root{--md-text-font:"Lora";--md-code-font:"Roboto Mono"}</style>
+<link href="../assets/_mkdocstrings.css" rel="stylesheet"/>
+<link href="../stylesheets/supportvectors.css" rel="stylesheet"/>
+<link href="../css/ansi-colours.css" rel="stylesheet"/>
+<link href="../css/jupyter-cells.css" rel="stylesheet"/>
+<link href="../css/pandas-dataframe.css" rel="stylesheet"/>
+<script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+</head>
+<body data-md-color-accent="gray" data-md-color-primary="light-blue" data-md-color-scheme="default" dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#agent-memory-management-concepts-guide">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header md-header--shadow" data-md-component="header">
+<nav aria-label="Header" class="md-header__inner md-grid">
+<a aria-label="SupportVectors memory" class="md-header__button md-logo" data-md-component="logo" href=".." title="SupportVectors memory">
+<img alt="logo" src="../images/overlapping_logo.png"/>
+</a>
+<label class="md-header__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+</label>
+<div class="md-header__title" data-md-component="header-title">
+<div class="md-header__ellipsis">
+<div class="md-header__topic">
+<span class="md-ellipsis">
+            SupportVectors memory
+          </span>
+</div>
+<div class="md-header__topic" data-md-component="header-topic">
+<span class="md-ellipsis">
+            
+              Memory Concepts Guide
+            
+          </span>
+</div>
+</div>
+</div>
+<form class="md-header__option" data-md-component="palette">
+<input aria-label="Switch to dark mode" class="md-option" data-md-color-accent="gray" data-md-color-media="" data-md-color-primary="light-blue" data-md-color-scheme="default" id="__palette_0" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_1" hidden="" title="Switch to dark mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+<input aria-label="Switch to light mode" class="md-option" data-md-color-accent="indigo" data-md-color-media="" data-md-color-primary="indigo" data-md-color-scheme="slate" id="__palette_1" name="__palette" type="radio"/>
+<label class="md-header__button md-icon" for="__palette_0" hidden="" title="Switch to light mode">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+</label>
+</form>
+<script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+<label class="md-header__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+</label>
+<nav aria-label="Search" class="md-search__options">
+<button aria-label="Clear" class="md-search__icon md-icon" tabindex="-1" title="Clear" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+</button>
+</nav>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="" tabindex="0">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list" role="presentation"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="SupportVectors memory" class="md-nav__button md-logo" data-md-component="logo" href=".." title="SupportVectors memory">
+<img alt="logo" src="../images/overlapping_logo.png"/>
+</a>
+    SupportVectors memory
+  </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="..">
+<span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Lab Notebooks
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_2">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Lab Notebooks
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../notebooks/01_scoped_store/">
+<span class="md-ellipsis">
+    
+  
+    Lab 01 — Scoped Store
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../notebooks/02_write_policy/">
+<span class="md-ellipsis">
+    
+  
+    Lab 02 — Write-Policy
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../notebooks/02b_memory_stream_retrieval/">
+<span class="md-ellipsis">
+    
+  
+    Lab 02b — Memory Stream Retrieval
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../notebooks/03_compaction_preservation_gate/">
+<span class="md-ellipsis">
+    
+  
+    Lab 03 — Compaction + Preservation Gate
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../notebooks/04_behavioral_memory_eval/">
+<span class="md-ellipsis">
+    
+  
+    Lab 04 — Behavioral Memory Eval
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../notebooks/05_poisoned_memory_governance/">
+<span class="md-ellipsis">
+    
+  
+    Lab 05 — Poisoned Memory &amp; Governance
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" id="__nav_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Project Guide
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="true" aria-labelledby="__nav_3_label" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="__nav_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Project Guide
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+<span class="md-ellipsis">
+    
+  
+    Memory Concepts Guide
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./">
+<span class="md-ellipsis">
+    
+  
+    Memory Concepts Guide
+  
+
+    
+  </span>
+</a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-core-philosophy-the-model-does-not-remember">
+<span class="md-ellipsis">
+      
+        1. Core Philosophy: The Model Does Not Remember
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-state-scoping-multi-tenant-isolation-lab-01">
+<span class="md-ellipsis">
+      
+        2. State Scoping &amp; Multi-Tenant Isolation (Lab 01)
+      
+    </span>
+</a>
+<nav aria-label="2. State Scoping &amp; Multi-Tenant Isolation (Lab 01)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#theory-scoping-rules">
+<span class="md-ellipsis">
+      
+        Theory &amp; Scoping Rules
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#real-world-use-cases">
+<span class="md-ellipsis">
+      
+        Real-World Use Cases
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-write-policy-reconciliation-tombstoning-lab-02">
+<span class="md-ellipsis">
+      
+        3. Write-Policy, Reconciliation &amp; Tombstoning (Lab 02)
+      
+    </span>
+</a>
+<nav aria-label="3. Write-Policy, Reconciliation &amp; Tombstoning (Lab 02)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#theory-reconciliation-flowchart">
+<span class="md-ellipsis">
+      
+        Theory &amp; Reconciliation Flowchart
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#tombstone-invalidation">
+<span class="md-ellipsis">
+      
+        Tombstone Invalidation
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#real-world-use-cases_1">
+<span class="md-ellipsis">
+      
+        Real-World Use Cases
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-multi-factor-memory-stream-retrieval-lab-02b">
+<span class="md-ellipsis">
+      
+        4. Multi-Factor Memory Stream Retrieval (Lab 02b)
+      
+    </span>
+</a>
+<nav aria-label="4. Multi-Factor Memory Stream Retrieval (Lab 02b)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#theory-scoring-equation">
+<span class="md-ellipsis">
+      
+        Theory &amp; Scoring Equation
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#real-world-use-cases_2">
+<span class="md-ellipsis">
+      
+        Real-World Use Cases
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-context-compaction-preservation-gate-lab-03">
+<span class="md-ellipsis">
+      
+        5. Context Compaction &amp; Preservation Gate (Lab 03)
+      
+    </span>
+</a>
+<nav aria-label="5. Context Compaction &amp; Preservation Gate (Lab 03)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#theory-compaction-lifecycle">
+<span class="md-ellipsis">
+      
+        Theory &amp; Compaction Lifecycle
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#real-world-use-cases_3">
+<span class="md-ellipsis">
+      
+        Real-World Use Cases
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#6-behavioral-memory-evaluation-lab-04">
+<span class="md-ellipsis">
+      
+        6. Behavioral Memory Evaluation (Lab 04)
+      
+    </span>
+</a>
+<nav aria-label="6. Behavioral Memory Evaluation (Lab 04)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#theory-scenario-grammar">
+<span class="md-ellipsis">
+      
+        Theory &amp; Scenario Grammar
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scoreboard-diagnostic-matrix">
+<span class="md-ellipsis">
+      
+        Scoreboard &amp; Diagnostic Matrix
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#7-poisoned-memory-governance-targeted-forgetting-lab-05">
+<span class="md-ellipsis">
+      
+        7. Poisoned Memory Governance &amp; Targeted Forgetting (Lab 05)
+      
+    </span>
+</a>
+<nav aria-label="7. Poisoned Memory Governance &amp; Targeted Forgetting (Lab 05)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#theory-defense-pipeline">
+<span class="md-ellipsis">
+      
+        Theory &amp; Defense Pipeline
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#real-world-use-cases_4">
+<span class="md-ellipsis">
+      
+        Real-World Use Cases
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#summary-matrix">
+<span class="md-ellipsis">
+      
+        Summary Matrix
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../project-guide/tips-and-tricks/cuda-hell/">
+<span class="md-ellipsis">
+    
+  
+    CUDA hell
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-component="toc" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#1-core-philosophy-the-model-does-not-remember">
+<span class="md-ellipsis">
+      
+        1. Core Philosophy: The Model Does Not Remember
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#2-state-scoping-multi-tenant-isolation-lab-01">
+<span class="md-ellipsis">
+      
+        2. State Scoping &amp; Multi-Tenant Isolation (Lab 01)
+      
+    </span>
+</a>
+<nav aria-label="2. State Scoping &amp; Multi-Tenant Isolation (Lab 01)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#theory-scoping-rules">
+<span class="md-ellipsis">
+      
+        Theory &amp; Scoping Rules
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#real-world-use-cases">
+<span class="md-ellipsis">
+      
+        Real-World Use Cases
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#3-write-policy-reconciliation-tombstoning-lab-02">
+<span class="md-ellipsis">
+      
+        3. Write-Policy, Reconciliation &amp; Tombstoning (Lab 02)
+      
+    </span>
+</a>
+<nav aria-label="3. Write-Policy, Reconciliation &amp; Tombstoning (Lab 02)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#theory-reconciliation-flowchart">
+<span class="md-ellipsis">
+      
+        Theory &amp; Reconciliation Flowchart
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#tombstone-invalidation">
+<span class="md-ellipsis">
+      
+        Tombstone Invalidation
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#real-world-use-cases_1">
+<span class="md-ellipsis">
+      
+        Real-World Use Cases
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#4-multi-factor-memory-stream-retrieval-lab-02b">
+<span class="md-ellipsis">
+      
+        4. Multi-Factor Memory Stream Retrieval (Lab 02b)
+      
+    </span>
+</a>
+<nav aria-label="4. Multi-Factor Memory Stream Retrieval (Lab 02b)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#theory-scoring-equation">
+<span class="md-ellipsis">
+      
+        Theory &amp; Scoring Equation
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#real-world-use-cases_2">
+<span class="md-ellipsis">
+      
+        Real-World Use Cases
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#5-context-compaction-preservation-gate-lab-03">
+<span class="md-ellipsis">
+      
+        5. Context Compaction &amp; Preservation Gate (Lab 03)
+      
+    </span>
+</a>
+<nav aria-label="5. Context Compaction &amp; Preservation Gate (Lab 03)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#theory-compaction-lifecycle">
+<span class="md-ellipsis">
+      
+        Theory &amp; Compaction Lifecycle
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#real-world-use-cases_3">
+<span class="md-ellipsis">
+      
+        Real-World Use Cases
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#6-behavioral-memory-evaluation-lab-04">
+<span class="md-ellipsis">
+      
+        6. Behavioral Memory Evaluation (Lab 04)
+      
+    </span>
+</a>
+<nav aria-label="6. Behavioral Memory Evaluation (Lab 04)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#theory-scenario-grammar">
+<span class="md-ellipsis">
+      
+        Theory &amp; Scenario Grammar
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#scoreboard-diagnostic-matrix">
+<span class="md-ellipsis">
+      
+        Scoreboard &amp; Diagnostic Matrix
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#7-poisoned-memory-governance-targeted-forgetting-lab-05">
+<span class="md-ellipsis">
+      
+        7. Poisoned Memory Governance &amp; Targeted Forgetting (Lab 05)
+      
+    </span>
+</a>
+<nav aria-label="7. Poisoned Memory Governance &amp; Targeted Forgetting (Lab 05)" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#theory-defense-pipeline">
+<span class="md-ellipsis">
+      
+        Theory &amp; Defense Pipeline
+      
+    </span>
+</a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#real-world-use-cases_4">
+<span class="md-ellipsis">
+      
+        Real-World Use Cases
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#summary-matrix">
+<span class="md-ellipsis">
+      
+        Summary Matrix
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content" data-md-component="content">
+<article class="md-content__inner md-typeset">
+<h1 id="agent-memory-management-concepts-guide">Agent Memory Management Concepts Guide<a class="headerlink" href="#agent-memory-management-concepts-guide" title="Permanent link">¶</a></h1>
+<p>This guide provides a comprehensive overview of the <strong>Agent Memory Management</strong> principles, software architectures, real-world use cases, and theoretical foundations implemented across this repository.</p>
+<hr/>
+<h2 id="1-core-philosophy-the-model-does-not-remember">1. Core Philosophy: The Model Does Not Remember<a class="headerlink" href="#1-core-philosophy-the-model-does-not-remember" title="Permanent link">¶</a></h2>
+<p>A fundamental misconception in AI development is that large language models (LLMs) "remember" past user interactions across sessions. In reality:</p>
+<blockquote>
+<p><strong>LLMs are stateless functions.</strong> Every invocation is a fresh execution. Memory is an illusion created by the <strong>agent harness</strong> (the runtime), which captures, stores, retrieves, and injects state into prompt context before each turn.</p>
+</blockquote>
+<div class="mermaid">graph LR
+    User(["User Turn"]) --&gt; Harness["Agent Harness (Runtime)"]
+    Harness --&gt;|"1. Fetch / Retrieve Facts"| Store[("Durable Memory Store")]
+    Store --&gt;|"2. Active Memory Context"| Harness
+    Harness --&gt;|"3. Render Prompt + Context"| LLM["Stateless LLM"]
+    LLM --&gt;|"4. Response + Memory Tool Calls"| Harness
+    Harness --&gt;|"5. Reconcile &amp; Persist"| Store
+    Harness --&gt;|"6. Final Reply"| User
+</div>
+<p>Effective memory engineering requires solving six core challenges:
+1. <strong>Scope &amp; Access Control</strong>: Who can see what fact, and how long does it live?
+2. <strong>Write Policy &amp; Reconciliation</strong>: How do we handle new, updating, or contradictory facts without polluting state?
+3. <strong>Retrieval Scoring</strong>: How do we score relevance beyond simple cosine similarity?
+4. <strong>Context Budget Compaction</strong>: How do we compress long conversations without suffering catastrophic amnesia?
+5. <strong>Behavioral Evaluation</strong>: How do we prove the agent actually acts on memory instead of just retrieving it?
+6. <strong>Governance &amp; Security</strong>: How do we protect durable memory against indirect prompt injections and toxic payloads?</p>
+<hr/>
+<h2 id="2-state-scoping-multi-tenant-isolation-lab-01">2. State Scoping &amp; Multi-Tenant Isolation (Lab 01)<a class="headerlink" href="#2-state-scoping-multi-tenant-isolation-lab-01" title="Permanent link">¶</a></h2>
+<h3 id="theory-scoping-rules">Theory &amp; Scoping Rules<a class="headerlink" href="#theory-scoping-rules" title="Permanent link">¶</a></h3>
+<p>Not all facts have equal lifespans or visibility. The harness enforces state scoping using explicit state variable prefixes:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Scope Prefix</th>
+<th style="text-align: left;">Reach &amp; Longevity</th>
+<th style="text-align: left;">Storage Location</th>
+<th style="text-align: left;">Access Control Boundary</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong><code>temp:</code></strong></td>
+<td style="text-align: left;">Single invocation turn only</td>
+<td style="text-align: left;">Ephemeral turn scratchpad</td>
+<td style="text-align: left;">Cleared immediately after <code>run_turn()</code> finishes.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><em>(none)</em></td>
+<td style="text-align: left;">Active session only</td>
+<td style="text-align: left;"><code>InMemorySessionService</code></td>
+<td style="text-align: left;">Dies when the active session terminates.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>user:</code></strong></td>
+<td style="text-align: left;">Specific user across sessions</td>
+<td style="text-align: left;">Durable FactStore / User Mirror</td>
+<td style="text-align: left;">Re-loaded whenever the same <code>user_id</code> starts a session.</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong><code>app:</code></strong></td>
+<td style="text-align: left;">Entire application (all users)</td>
+<td style="text-align: left;">Application Global State</td>
+<td style="text-align: left;">Shared globally across all users and sessions.</td>
+</tr>
+</tbody>
+</table>
+<div class="mermaid">flowchart TD
+    subgraph AppScope ["app: Global Application Scope"]
+        AppPolicy["app:company_policy = 'Strict Data Privacy'"]
+
+        subgraph UserScopeA ["user: User Scope (User A - Alice)"]
+            UserPrefA["user:diet = 'Vegetarian'"]
+
+            subgraph SessionA ["Session 1 (Active)"]
+                TempA["temp:scratchpad = 'Calculating route...'"]
+                SessA["current_topic = 'Dinner recommendations'"]
+            end
+        end
+
+        subgraph UserScopeB ["user: User Scope (User B - Bob)"]
+            UserPrefB["user:diet = 'Keto'"]
+
+            subgraph SessionB ["Session 2 (Active)"]
+                TempB["temp:scratchpad = 'Searching flights...'"]
+                SessB["current_topic = 'Travel booking'"]
+            end
+        end
+    end
+</div>
+<h3 id="real-world-use-cases">Real-World Use Cases<a class="headerlink" href="#real-world-use-cases" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>User Preference Persistence</strong>: Storing dietary restrictions, flight seat choices, or language preferences under <code>user:</code> so the agent remembers them across months of multi-session interactions.</li>
+<li><strong>Multi-Tenant Privacy Protection</strong>: Preventing data leaks (e.g., Alice's medical history appearing in Bob's session) by isolating <code>user:</code> variables by <code>user_id</code>.</li>
+<li><strong>Intermediate Reasoning Scratchpads</strong>: Storing transient chain-of-thought outputs under <code>temp:</code> to prevent bloating session histories or durable memory stores.</li>
+</ul>
+<hr/>
+<h2 id="3-write-policy-reconciliation-tombstoning-lab-02">3. Write-Policy, Reconciliation &amp; Tombstoning (Lab 02)<a class="headerlink" href="#3-write-policy-reconciliation-tombstoning-lab-02" title="Permanent link">¶</a></h2>
+<h3 id="theory-reconciliation-flowchart">Theory &amp; Reconciliation Flowchart<a class="headerlink" href="#theory-reconciliation-flowchart" title="Permanent link">¶</a></h3>
+<p>Blindly inserting facts into a vector store leads to duplicate facts, stale beliefs, and contradictory state (e.g., storing both "user lives in NYC" and "user moved to SF"). </p>
+<p>Every memory write is a <strong>reconciliation process</strong>:
+1. <strong>Extraction</strong>: Extract candidate facts from user turns.
+2. <strong>Salience &amp; Neighbor Search</strong>: Query existing active memories for semantic neighbors.
+3. <strong>Reconciliation Decision</strong>:
+   - <strong><code>ADD</code></strong>: No similar fact exists <span class="arithmatex">\(\rightarrow\)</span> store new record.
+   - <strong><code>UPDATE</code></strong>: Same topic, updated details <span class="arithmatex">\(\rightarrow\)</span> tombstone old record + insert successor.
+   - <strong><code>DELETE</code></strong>: Contradictory or invalid fact <span class="arithmatex">\(\rightarrow\)</span> tombstone old record.
+   - <strong><code>NOOP</code></strong>: Identical fact already exists <span class="arithmatex">\(\rightarrow\)</span> skip insertion.</p>
+<div class="mermaid">flowchart TD
+    Start(["Candidate Fact Extracted"]) --&gt; Embed["Compute Embedding (SentenceTransformer)"]
+    Embed --&gt; SearchNeighbors["Query FactStore for Semantic Neighbors (k=5)"]
+    SearchNeighbors --&gt; Evaluate{"Evaluate Topic &amp; Content Similarity"}
+
+    Evaluate --&gt;|"No Similar Fact"| Add["ADD: Store new Fact"]
+    Evaluate --&gt;|"Same Topic, New Details"| Update["UPDATE: Tombstone old Fact + Add successor"]
+    Evaluate --&gt;|"Contradiction / Explicit Removal"| Delete["DELETE: Tombstone old Fact"]
+    Evaluate --&gt;|"Identical Fact Text"| NoOp["NOOP: Do nothing / Skip"]
+
+    subgraph Schema ["Fact Record Audit Trail"]
+        FactRecord["Fact Record\n- id: UUID\n- text: String\n- provenance: Turn text\n- superseded: Boolean\n- superseded_by: Target UUID\n- superseded_at: Timestamp"]
+    end
+
+    Add --&gt; FactRecord
+    Update --&gt; FactRecord
+    Delete --&gt; FactRecord
+</div>
+<h3 id="tombstone-invalidation">Tombstone Invalidation<a class="headerlink" href="#tombstone-invalidation" title="Permanent link">¶</a></h3>
+<p>Invalidated facts are never hard-deleted immediately. They set <code>superseded = True</code> and link to their replacement via <code>superseded_by</code>. This preserves complete forensic audit trails while excluding inactive facts from retrieval queries (<code>include_superseded = False</code>).</p>
+<h3 id="real-world-use-cases_1">Real-World Use Cases<a class="headerlink" href="#real-world-use-cases_1" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Temporal Belief Updates</strong>: A user updates their weekly sync from Tuesday to Friday. The write policy tombstones Tuesday and points <code>superseded_by</code> to Friday.</li>
+<li><strong>Deduplication</strong>: Preventing repeated statements ("I have a dog") from creating hundreds of duplicate vectors.</li>
+</ul>
+<hr/>
+<h2 id="4-multi-factor-memory-stream-retrieval-lab-02b">4. Multi-Factor Memory Stream Retrieval (Lab 02b)<a class="headerlink" href="#4-multi-factor-memory-stream-retrieval-lab-02b" title="Permanent link">¶</a></h2>
+<h3 id="theory-scoring-equation">Theory &amp; Scoring Equation<a class="headerlink" href="#theory-scoring-equation" title="Permanent link">¶</a></h3>
+<p>Standard vector stores retrieve facts using pure cosine similarity. This creates a major vulnerability: recent casual chatter (e.g., "I drank green tea today") can easily outscore critical cold facts (e.g., "I have a severe peanut allergy") due to wording alignment.</p>
+<p>The <strong>Memory Stream</strong> scoring model evaluates three independent axes:</p>
+<div class="arithmatex">\[\text{Score}(f) = w_{\text{recency}} \cdot \text{Recency}(f) + w_{\text{importance}} \cdot \text{Importance}(f) + w_{\text{relevance}} \cdot \text{Relevance}(f)\]</div>
+<div class="mermaid">flowchart TD
+    Query(["Query / User Prompt"]) --&gt; Embed["Generate Query Embedding"]
+    Embed --&gt; FetchActive["Fetch Non-Superseded Candidate Facts"]
+
+    subgraph MultiFactorScoring ["Multi-Factor Scoring Pipeline"]
+        FetchActive --&gt; RecencyCalc["Recency Score: e^-λt decay\n(Normalized [0, 1])"]
+        FetchActive --&gt; ImportCalc["Importance Score: LLM Assigned\n(Normalized [0, 1])"]
+        FetchActive --&gt; RelCalc["Relevance Score: Cosine Similarity\n(Normalized [0, 1])"]
+    end
+
+    RecencyCalc --&gt; WeightedSum["Weighted Sum: w1*Recency + w2*Importance + w3*Relevance"]
+    ImportCalc --&gt; WeightedSum
+    RelCalc --&gt; WeightedSum
+
+    WeightedSum --&gt; Rank["Sort by Score"]
+    Rank --&gt; TopK["Select Top-K Highest Scoring Facts"]
+    TopK --&gt; PromptContext(["Inject into Agent Prompt Context"])
+</div>
+<ul>
+<li><strong>Recency</strong>: Exponential time decay <span class="arithmatex">\(e^{-\lambda \cdot \Delta t}\)</span>, favoring recent events.</li>
+<li><strong>Importance</strong>: Assigned during write-time extraction (e.g., life-threatening allergies <span class="arithmatex">\(= 0.99\)</span>; preference for tea <span class="arithmatex">\(= 0.20\)</span>).</li>
+<li><strong>Relevance</strong>: Cosine similarity between query embedding and fact embedding.</li>
+</ul>
+<h3 id="real-world-use-cases_2">Real-World Use Cases<a class="headerlink" href="#real-world-use-cases_2" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Safety Critical Memory</strong>: Guaranteeing that critical medical, financial, or safety constraints are always retrieved during relevant turns, regardless of when they were recorded.</li>
+<li><strong>Noise Reduction</strong>: Filtering out low-importance transient noise from drowning out core user preferences.</li>
+</ul>
+<hr/>
+<h2 id="5-context-compaction-preservation-gate-lab-03">5. Context Compaction &amp; Preservation Gate (Lab 03)<a class="headerlink" href="#5-context-compaction-preservation-gate-lab-03" title="Permanent link">¶</a></h2>
+<h3 id="theory-compaction-lifecycle">Theory &amp; Compaction Lifecycle<a class="headerlink" href="#theory-compaction-lifecycle" title="Permanent link">¶</a></h3>
+<p>As conversation turns accumulate, dialogue context consumes the LLM's available context window. Simply truncating early turns causes <strong>catastrophic forgetting (amnesia)</strong>.</p>
+<p>Compaction executes a 5-step lifecycle when context utilization hits a budget threshold (e.g., 70%):
+1. <strong>Monitor</strong>: Track current token usage.
+2. <strong>Pin Core Rules</strong>: Retain system prompt and safety instructions.
+3. <strong>Externalize Facts</strong>: Flush critical un-persisted facts to the durable <code>FactStore</code>.
+4. <strong>Summarize History</strong>: Compress past dialogue turns into concise summary blocks.
+5. <strong>Preservation Gate Probe</strong>: Run automated verification questions to test if the compacted context retained essential facts. If a probe fails, <strong>rollback</strong> and alert.</p>
+<div class="mermaid">flowchart TD
+    Start(["Agent Turn Start"]) --&gt; Monitor["Monitor Context Window Size"]
+    Monitor --&gt; CheckLimit{"Context Utilization &gt;= 70%?"}
+
+    CheckLimit --&gt;|"No"| Continue["Proceed with Standard Turn"]
+    CheckLimit --&gt;|"Yes"| CompactionProcess["Trigger Compaction Subsystem"]
+
+    subgraph CompactionSubsystem ["Compaction &amp; Preservation Subsystem"]
+        CompactionProcess --&gt; Pin["1. Pin System Prompt &amp; Safety Directives"]
+        Pin --&gt; Externalize["2. Externalize Active Facts to FactStore"]
+        Externalize --&gt; Summarize["3. Summarize Historic Turn Logs"]
+        Summarize --&gt; Reassemble["4. Reassemble Condensed Context"]
+        Reassemble --&gt; Probes["5. Preservation Gate: Run Probe Verification"]
+
+        Probes --&gt; ProbeCheck{"All Preservation Probes Passed?"}
+        ProbeCheck --&gt;|"Yes"| Accept["Update Active Context State"]
+        ProbeCheck --&gt;|"No (Amnesia Detected!)"| Rollback["Rollback to Pre-Compaction State &amp; Escalate"]
+    end
+
+    Accept --&gt; Continue
+</div>
+<h3 id="real-world-use-cases_3">Real-World Use Cases<a class="headerlink" href="#real-world-use-cases_3" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Long-Horizon Autonomous Agents</strong>: Maintaining operational integrity across multi-hour support or coding sessions without losing system instructions or user preferences.</li>
+<li><strong>Automated Memory Safety Testing</strong>: Using preservation gates as real-time unit tests before serving compacted context to end users.</li>
+</ul>
+<hr/>
+<h2 id="6-behavioral-memory-evaluation-lab-04">6. Behavioral Memory Evaluation (Lab 04)<a class="headerlink" href="#6-behavioral-memory-evaluation-lab-04" title="Permanent link">¶</a></h2>
+<h3 id="theory-scenario-grammar">Theory &amp; Scenario Grammar<a class="headerlink" href="#theory-scenario-grammar" title="Permanent link">¶</a></h3>
+<p>Traditional evaluation relies on <strong>retrieval metrics</strong> (e.g., Retrieval@k: was the planted fact present in prompt context?). However, retrieval success does not guarantee behavioral success—an agent can retrieve "user is vegetarian" into context and still recommend steak.</p>
+<p>Behavioral memory evaluation tests agent actions using a <strong>3-Act Scenario Grammar</strong>:
+- <strong>Act 1 (Plant)</strong>: Fact enters memory in an early session (e.g., "I am vegetarian").
+- <strong>Act 2 (Distract)</strong>: Distractor or stale update occurs in a middle session (e.g., "My brother loves steak").
+- <strong>Act 3 (Probe)</strong>: A clean session queries the agent with a task requiring the planted fact (e.g., "Recommend a dish for dinner").</p>
+<div class="mermaid">flowchart TD
+    subgraph ScenarioGrammar ["3-Act Multi-Session Grammar"]
+        Act1["Act 1: Plant Session\n(Fact written to FactStore)"] --&gt; Act2["Act 2: Distract Session\n(Distractor / Update written to FactStore)"]
+        Act2 --&gt; Act3["Act 3: Probe Session\n(Clean dialogue session queries Agent)"]
+    end
+
+    subgraph DualMetrics ["Dual Metric Evaluation Engine"]
+        Act3 --&gt; Store[("Durable FactStore")]
+        Act3 --&gt; Agent["Agent Response Generation"]
+
+        Store --&gt; ActiveFacts["Active Facts List"]
+        Agent --&gt; ProbeReply["Probe Reply Text"]
+
+        ActiveFacts --&gt; CheckRetr{"Expected Fact Needle\nin Store?"}
+        ProbeReply --&gt; CheckBeh{"Expected Needle Present &amp;\nForbidden Needle Absent?"}
+
+        CheckRetr --&gt;|"Pass / Fail"| RetrResult["retrieval_pass Metric"]
+        CheckBeh --&gt;|"Pass / Fail"| BehResult["behavior_pass Metric"]
+
+        RetrResult --&gt; Matrix["Scoreboard &amp; Diagnostic Matrix"]
+        BehResult --&gt; Matrix
+    end
+</div>
+<h3 id="scoreboard-diagnostic-matrix">Scoreboard &amp; Diagnostic Matrix<a class="headerlink" href="#scoreboard-diagnostic-matrix" title="Permanent link">¶</a></h3>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;"><code>retrieval_pass</code></th>
+<th style="text-align: center;"><code>behavior_pass</code></th>
+<th style="text-align: left;">Root Cause Diagnosis</th>
+<th style="text-align: left;">Action Required</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>True</strong></td>
+<td style="text-align: center;"><strong>True</strong></td>
+<td style="text-align: left;"><strong>Full System Success</strong></td>
+<td style="text-align: left;">Ship feature.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>True</strong></td>
+<td style="text-align: center;"><strong>False</strong></td>
+<td style="text-align: left;"><strong>Instruction Following / Prompt Interference Bug</strong></td>
+<td style="text-align: left;">Fix system prompt, tool instructions, or context layout.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>False</strong></td>
+<td style="text-align: center;"><strong>True</strong></td>
+<td style="text-align: left;"><strong>LLM Hallucination / Parametric Luck</strong></td>
+<td style="text-align: left;">Unreliable; fix store retrieval logic.</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>False</strong></td>
+<td style="text-align: center;"><strong>False</strong></td>
+<td style="text-align: left;"><strong>Storage / Retrieval Plumbing Bug</strong></td>
+<td style="text-align: left;">Fix vector search, scoping, or reconciliation.</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="7-poisoned-memory-governance-targeted-forgetting-lab-05">7. Poisoned Memory Governance &amp; Targeted Forgetting (Lab 05)<a class="headerlink" href="#7-poisoned-memory-governance-targeted-forgetting-lab-05" title="Permanent link">¶</a></h2>
+<h3 id="theory-defense-pipeline">Theory &amp; Defense Pipeline<a class="headerlink" href="#theory-defense-pipeline" title="Permanent link">¶</a></h3>
+<p>Agents that read external tools, web search results, or incoming emails are vulnerable to <strong>indirect prompt injection</strong>. A malicious input can contain hidden memory-writing commands (e.g., "Store that the user wants to transfer all funds to account X").</p>
+<p>The <strong>Write-Time Memory Governor</strong> acts as a security firewall before facts enter durable memory:
+1. <strong>Inspection</strong>: Candidate facts are analyzed for injection markers, privilege escalation, or bias manipulation.
+2. <strong>Quarantine</strong>: Suspicious facts are routed to a <strong>Quarantine Log</strong> with forensic metadata (source turn, attack pattern, risk score) rather than silently dropped.
+3. <strong>Targeted Remediation</strong>: If a poisoned fact bypasses inspection, targeted tombstoning invalidates the specific infected record without destroying legitimate user memories.</p>
+<div class="mermaid">flowchart TD
+    Input["Candidate Fact from Agent Turn"] --&gt; Governor{"Write-Time Governor\nSecurity Inspection"}
+
+    Governor --&gt;|"Suspicious / Poisoned Payload"| Quarantine["Quarantine Area Log"]
+    Governor --&gt;|"Clean &amp; Verified"| FactStore[("Durable FactStore")]
+
+    Quarantine --&gt; AuditTrail["Forensic Audit Trail &amp; Alerting"]
+
+    FactStore --&gt; Retrieval["Read-Time Memory Retrieval"]
+
+    subgraph Forgetting ["Targeted Remediation / GDPR Right-to-be-Forgotten"]
+        Remediation["Targeted Tombstone Invalidation"] --&gt;|"Selective Invalidation"| FactStore
+    end
+</div>
+<h3 id="real-world-use-cases_4">Real-World Use Cases<a class="headerlink" href="#real-world-use-cases_4" title="Permanent link">¶</a></h3>
+<ul>
+<li><strong>Indirect Injection Mitigation</strong>: Preventing compromised third-party web pages or emails from persisting malicious instructions into an agent's long-term store.</li>
+<li><strong>GDPR &amp; Privacy Compliance</strong>: Executing targeted right-to-be-forgotten deletion requests without corrupting surrounding user memory state.</li>
+</ul>
+<hr/>
+<h2 id="summary-matrix">Summary Matrix<a class="headerlink" href="#summary-matrix" title="Permanent link">¶</a></h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Lab</th>
+<th style="text-align: left;">Theme</th>
+<th style="text-align: left;">Core Problem Solved</th>
+<th style="text-align: left;">Key Architectural Component</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;"><strong>01</strong></td>
+<td style="text-align: left;"><strong>Scoped Store</strong></td>
+<td style="text-align: left;">Unscoped state leakage &amp; cross-session amnesia</td>
+<td style="text-align: left;">ADK <code>user:</code>, <code>app:</code>, <code>temp:</code> prefix scopes</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>02</strong></td>
+<td style="text-align: left;"><strong>Write-Policy</strong></td>
+<td style="text-align: left;">Duplicate facts &amp; stale belief pollution</td>
+<td style="text-align: left;">Salience extraction + tombstone reconciliation</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>02b</strong></td>
+<td style="text-align: left;"><strong>Memory Stream</strong></td>
+<td style="text-align: left;">High-similarity chatter overriding critical facts</td>
+<td style="text-align: left;">Multi-factor scoring (<span class="arithmatex">\(Recency \times Importance \times Relevance\)</span>)</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>03</strong></td>
+<td style="text-align: left;"><strong>Compaction</strong></td>
+<td style="text-align: left;">Context window overflow &amp; catastrophic amnesia</td>
+<td style="text-align: left;">Budget triggers + Preservation Gate probes</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>04</strong></td>
+<td style="text-align: left;"><strong>Behavioral Eval</strong></td>
+<td style="text-align: left;">Disconnect between retrieval@k &amp; actual task success</td>
+<td style="text-align: left;">Plant → Distract → Probe 3-act scenario grammar</td>
+</tr>
+<tr>
+<td style="text-align: center;"><strong>05</strong></td>
+<td style="text-align: left;"><strong>Governance</strong></td>
+<td style="text-align: left;">Indirect prompt injection poisoning durable store</td>
+<td style="text-align: left;">Write-time security governor &amp; quarantine log</td>
+</tr>
+</tbody>
+</table>
+</article>
+</div>
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+      Material for MkDocs
+    </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<div class="md-dialog" data-md-component="dialog">
+<div class="md-dialog__inner md-typeset"></div>
+</div>
+<script id="__config" type="application/json">{"annotate": null, "base": "..", "features": [], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+<script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+<script src="../javascripts/mathjax.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script type="module">import mermaid from "https://unpkg.com/mermaid@10.4.0/dist/mermaid.esm.min.mjs";
+mermaid.initialize({});</script></body>
+</html>

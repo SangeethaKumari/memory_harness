@@ -4,6 +4,8 @@ Hands-on Jupyter labs for building **agent memory** with [Google Agent Developme
 
 Theory is taught inside each notebook. Supporting Python lives under `src/memory/`; notebooks under `docs/notebooks/` are narrative + exercises only.
 
+> 📘 **New to Agent Memory?** Read the comprehensive [Agent Memory Management Concepts Guide](docs/memory_concepts_guide.md) for a deep dive into state scoping, write policies, multi-factor scoring, context compaction, behavioral evaluation, and security governance with architectural diagrams and real-world use cases.
+
 ---
 
 ## Lab sequence

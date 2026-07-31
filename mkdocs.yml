@@ -18,6 +18,7 @@ nav:
       - 'Lab 04 — Behavioral Memory Eval': notebooks/04_behavioral_memory_eval.ipynb
       - 'Lab 05 — Poisoned Memory & Governance': notebooks/05_poisoned_memory_governance.ipynb
   - Project Guide:
+      - 'Memory Concepts Guide': memory_concepts_guide.md
       - 'CUDA hell': project-guide/tips-and-tricks/cuda-hell.md
 
 # -----------------------------------------------------------------------------
