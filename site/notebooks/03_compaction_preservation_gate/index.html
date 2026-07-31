@@ -1,0 +1,1569 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="memory">
+      
+      
+        <meta name="author" content="SupportVectors">
+      
+      
+        <link rel="canonical" href="https://supportvectors.ai/memory/notebooks/03_compaction_preservation_gate/">
+      
+      
+        <link rel="prev" href="../02b_memory_stream_retrieval/">
+      
+      
+        <link rel="next" href="../04_behavioral_memory_eval/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../images/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Lab 03 — Compaction + Preservation Gate - SupportVectors memory</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Lora";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/supportvectors.css">
+    
+      <link rel="stylesheet" href="../../css/ansi-colours.css">
+    
+      <link rel="stylesheet" href="../../css/jupyter-cells.css">
+    
+      <link rel="stylesheet" href="../../css/pandas-dataframe.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="light-blue" data-md-color-accent="gray">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#lab-03-compaction-with-a-preservation-gate" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SupportVectors memory" class="md-header__button md-logo" aria-label="SupportVectors memory" data-md-component="logo">
+      
+  <img src="../../images/overlapping_logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SupportVectors memory
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Lab 03 — Compaction + Preservation Gate
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="light-blue" data-md-color-accent="gray"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SupportVectors memory" class="md-nav__button md-logo" aria-label="SupportVectors memory" data-md-component="logo">
+      
+  <img src="../../images/overlapping_logo.png" alt="logo">
+
+    </a>
+    SupportVectors memory
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Notebooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Lab Notebooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01_scoped_store/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 01 — Scoped Store
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02_write_policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 02 — Write-Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02b_memory_stream_retrieval/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 02b — Memory Stream Retrieval
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 03 — Compaction + Preservation Gate
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 03 — Compaction + Preservation Gate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#learning-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#theory-you-need" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Theory you need
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-a-a-toy-context-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part A — A toy context object
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-b-pre-compaction-flush-summarize-and-evict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part B — Pre-compaction flush + summarize-and-evict
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-c-induce-compaction-amnesia-then-fix-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part C — Induce compaction amnesia (then fix it)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-lab" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next lab
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04_behavioral_memory_eval/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 04 — Behavioral Memory Eval
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05_poisoned_memory_governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 05 — Poisoned Memory & Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Project Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../project-guide/tips-and-tricks/cuda-hell/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CUDA hell
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#learning-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#theory-you-need" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Theory you need
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-a-a-toy-context-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part A — A toy context object
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-b-pre-compaction-flush-summarize-and-evict" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part B — Pre-compaction flush + summarize-and-evict
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-c-induce-compaction-amnesia-then-fix-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part C — Induce compaction amnesia (then fix it)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-lab" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next lab
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script>
+(function() {
+  function addWidgetsRenderer() {
+    var requireJsScript = document.createElement('script');
+    requireJsScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js';
+
+    var mimeElement = document.querySelector('script[type="application/vnd.jupyter.widget-view+json"]');
+    var jupyterWidgetsScript = document.createElement('script');
+    var widgetRendererSrc = 'https://unpkg.com/@jupyter-widgets/html-manager@*/dist/embed-amd.js';
+    var widgetState;
+
+    // Fallback for older version:
+    try {
+      widgetState = mimeElement && JSON.parse(mimeElement.innerHTML);
+
+      if (widgetState && (widgetState.version_major < 2 || !widgetState.version_major)) {
+        widgetRendererSrc = 'jupyter-js-widgets@*/dist/embed.js';
+      }
+    } catch(e) {}
+
+    jupyterWidgetsScript.src = widgetRendererSrc;
+
+    document.body.appendChild(requireJsScript);
+    document.body.appendChild(jupyterWidgetsScript);
+  }
+
+  document.addEventListener('DOMContentLoaded', addWidgetsRenderer);
+}());
+</script>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<center>
+<img alt="No description has been provided for this image" src="https://supportvectors.ai/logo-poster-transparent.png" style="opacity:0.8" width="400px"/>
+</center>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">run</span> <span class="n">supportvectors</span><span class="o">-</span><span class="n">common</span><span class="o">.</span><span class="n">ipynb</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_html rendered_html output_subarea">
+
+<!-- Many of the styles here are inspired by: 
+    https://towardsdatascience.com/10-practical-tips-you-need-to-know-to-personalize-jupyter-notebook-fbd202777e20 
+
+
+    On the author's local machine, these exist in the custom.css file. However, in order to keep uniform look and feel, 
+    and at the request of participants, I have added it to this common import-file here.
+
+    -->
+
+
+<link href="https://fonts.googleapis.com/css?family=Lora:400,700|Montserrat:300" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro&amp;family=Literata&amp;display=swap" rel="stylesheet"/>
+<style>
+
+
+#ipython_notebook::before{
+ content:"Neural Architectures";
+        color: white;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-family: 'Lora',serif;
+        font-size:16pt;
+        margin-bottom:15px;
+        margin-top:15px;
+
+}
+body > #header {
+    #background: #D15555;
+    background: linear-gradient(to bottom, indianred 0%, #fff 100%);
+    opacity: 0.8;
+
+}
+
+
+.navbar-default .navbar-nav > li > a, #kernel_indicator {
+    color: white;
+    transition: all 0.25s;
+    font-size:10pt;
+    font-family: sans-serif;
+    font-weight:normal;
+}
+.navbar-default {
+    padding-left:100px;
+    background: none;
+    border: none;
+}
+
+
+body > menubar-container {
+    background-color: wheat;
+}
+#ipython_notebook img{                                                                                        
+    display:block; 
+
+    background: url("https://www.supportvectors.com/wp-content/uploads/2016/03/logo-poster-smaller.png") no-repeat;
+    background-size: contain;
+
+    padding-left: 600px;
+    padding-right: 100px;
+
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+
+
+body {
+ #font-family:  'Literata', serif;
+    font-family:'Lora', san-serif;
+    text-align: justify;
+    font-weight: 400;
+    font-size: 12pt;
+}
+
+iframe{
+    width:100%;
+    min-height:600px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+# font-family: 'Montserrat', sans-serif;
+ font-family:'Lora', serif;
+ font-weight: 200;
+ text-transform: uppercase;
+ color: #EC7063 ;
+}
+
+h2 {
+    color: #000080;
+}
+
+.checkpoint_status, .autosave_status {
+    color:wheat;
+}
+
+#notebook_name {
+    font-weight: 600;
+    font-size:20pt;
+    text-variant:uppercase;
+    color: wheat; 
+    margin-right:20px;
+    margin-left:-500px;
+}
+#notebook_name:hover {
+background-color: salmon;
+}
+
+
+.dataframe { /* dataframe atau table */
+    background: white;
+    box-shadow: 0px 1px 2px #bbb;
+}
+.dataframe thead th, .dataframe tbody td {
+    text-align: center;
+    padding: 1em;
+}
+
+.checkpoint_status, .autosave_status {
+    color:wheat;
+}
+
+.output {
+    align-items: center;
+}
+
+div.cell {
+    transition: all 0.25s;
+    border: none;
+    position: relative;
+    top: 0;
+}
+div.cell.selected, div.cell.selected.jupyter-soft-selected {
+    border: none;
+    background: transparent;
+    box-shadow: 0 6px 18px #aaa;
+    z-index: 10;
+    top: -10px;
+}
+.CodeMirror pre, .CodeMirror-dialog, .CodeMirror-dialog .CodeMirror-search-field, .terminal-app .terminal {
+    font-family: 'Hack' , serif; 
+    font-weight: 500;
+    font-size: 14pt;
+}
+
+
+
+</style>
+</div>
+</div>
+<div class="output_area">
+<div style="color:#aaa;font-size:8pt">
+
+<hr/>
+
+
+© SupportVectors. All rights reserved. <blockquote>This notebook is the intellectual property of SupportVectors, and part of its training material. 
+Only the participants in SupportVectors workshops are allowed to study the notebooks for educational purposes currently, but is prohibited from copying or using it for any other purposes without written permission.
+
+<p><b> These notebooks are chapters and sections from Asif Qamar's textbook that he is writing on Data Science. So we request you to not circulate the material to others.</b></p>
+</blockquote>
+
+<hr/>
+
+
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="lab-03-compaction-with-a-preservation-gate">Lab 03 — Compaction with a Preservation Gate<a class="headerlink" href="#lab-03-compaction-with-a-preservation-gate" title="Permanent link">&para;</a></h1>
+<h2 id="learning-goals">Learning goals<a class="headerlink" href="#learning-goals" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Treat the context window as a <strong>fixed budget</strong> (RAM), with durable memory as disk.</li>
+<li>Trigger compaction at ~<strong>70–80%</strong> of budget — never at 99% in a panic.</li>
+<li><strong>Pin</strong> load-bearing facts; summarize only the cold, evictable span.</li>
+<li>Install a <strong>preservation gate</strong>: must-answer probes must still pass after compaction.</li>
+<li>Practice a <strong>pre-compaction flush</strong> — externalize essentials <em>before</em> the lossy step.</li>
+</ol>
+<h2 id="theory-you-need">Theory you need<a class="headerlink" href="#theory-you-need" title="Permanent link">&para;</a></h2>
+<p><strong>Compaction</strong> is recall-first lossy compression of the working tier: fold older turns into a synopsis, splice the synopsis back, free tokens for the future.</p>
+<p>The characteristic failure mode is <strong>compaction amnesia</strong>: a load-bearing fact dies inside a summary-of-summaries and the agent later makes a wrong decision. Compaction is a <em>mutation</em> of memory; every mutation needs a regression gate.</p>
+<p>Reclamation order (cheap → irreversible):</p>
+<ol>
+<li>Drop what you can <strong>re-derive</strong> (tool results you can fetch again).  </li>
+<li><strong>Externalize</strong> (write essentials to durable memory).  </li>
+<li>Only then <strong>compact</strong> (lossy summarize).</li>
+</ol>
+<p>Pinned forever (never compaction candidates): system prompt, agent identity, hard constraints, and a small set of always-relevant core facts.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="c1"># Supporting Python lives in src/memory (installed via `uv sync`).</span>
+<span class="c1"># Notebooks only contain the lab narrative and exercises.</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">memory</span><span class="w"> </span><span class="kn">import</span> <span class="n">FactStore</span><span class="p">,</span> <span class="n">complete</span><span class="p">,</span> <span class="n">load_lab_env</span><span class="p">,</span> <span class="n">model_summary</span>
+
+<span class="n">load_lab_env</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;LLM:&quot;</span><span class="p">,</span> <span class="n">model_summary</span><span class="p">())</span>
+
+<span class="c1"># Simulated window budget (tokens ≈ words for teaching; not a real tokenizer).</span>
+<span class="n">BUDGET</span> <span class="o">=</span> <span class="mi">200</span>          <span class="c1"># tiny on purpose so compaction fires quickly in the lab</span>
+<span class="n">THRESHOLD</span> <span class="o">=</span> <span class="mf">0.70</span>      <span class="c1"># compact when live conversation &amp;gt;= 70% of budget</span>
+<span class="n">PINNED</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;SYSTEM: You are a careful medical-aware travel assistant.&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;CORE: Never recommend food that violates a known allergy.&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="n">durable</span> <span class="o">=</span> <span class="n">FactStore</span><span class="p">()</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>
+<code>WARNING:root:No configuration file specified. Trying the default location
+WARNING:root:Loading configuration from /Users/chandarl/memory/config.yaml if it exists
+</code>
+</pre>
+</div>
+</div>
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>LLM: endpoint=http://10.0.10.51:8000/v1  model=openai/gpt-oss-120b
+</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="part-a-a-toy-context-object">Part A — A toy context object<a class="headerlink" href="#part-a-a-toy-context-object" title="Permanent link">&para;</a></h2>
+<p>We fake a context window as a list of message strings plus a word-count budget. Real ADK sessions store richer events; the <em>policy</em> is what we are learning.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">tokens</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()))</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">ToyContext</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pinned</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pinned</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pinned</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">live</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">role</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">live</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">role</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">live_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">tokens</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">live</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">pinned_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">tokens</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pinned</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">total_tokens</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pinned_tokens</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">live_tokens</span><span class="p">()</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pinned</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">live</span><span class="p">)</span>
+
+
+<span class="n">ctx</span> <span class="o">=</span> <span class="n">ToyContext</span><span class="p">(</span><span class="n">PINNED</span><span class="p">)</span>
+<span class="n">transcript</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;Planning a weekend in Osaka.&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;Great — food, museums, or both?&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;Both. Important: I have a severe peanut allergy.&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;Noted. I will avoid peanut dishes and flag shared fryers.&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;Day 1 should be museums; day 2 street food.&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;Sounds good. I will keep the allergy in mind for day 2.&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;Also I prefer walking under 8k steps per day.&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;I will keep routes compact.&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;What about dessert options on day 2?&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;I can suggest mochi and fruit ices from dedicated shops.&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;Please refine the day 2 food list.&quot;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s2">&quot;assistant&quot;</span><span class="p">,</span> <span class="s2">&quot;Refining with the allergy constraint still active.&quot;</span><span class="p">),</span>
+<span class="p">]</span>
+
+<span class="k">for</span> <span class="n">role</span><span class="p">,</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">transcript</span><span class="p">:</span>
+    <span class="n">ctx</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">role</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;pinned=</span><span class="si">{</span><span class="n">ctx</span><span class="o">.</span><span class="n">pinned_tokens</span><span class="p">()</span><span class="si">}</span><span class="s2">  live=</span><span class="si">{</span><span class="n">ctx</span><span class="o">.</span><span class="n">live_tokens</span><span class="p">()</span><span class="si">}</span><span class="s2">  total=</span><span class="si">{</span><span class="n">ctx</span><span class="o">.</span><span class="n">total_tokens</span><span class="p">()</span><span class="si">}</span><span class="s2">  budget=</span><span class="si">{</span><span class="n">BUDGET</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;--- context ---&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>pinned=17  live=107  total=124  budget=200
+--- context ---
+SYSTEM: You are a careful medical-aware travel assistant.
+CORE: Never recommend food that violates a known allergy.
+USER: Planning a weekend in Osaka.
+ASSISTANT: Great — food, museums, or both?
+USER: Both. Important: I have a severe peanut allergy.
+ASSISTANT: Noted. I will avoid peanut dishes and flag shared fryers.
+USER: Day 1 should be museums; day 2 street food.
+ASSISTANT: Sounds good. I will keep the allergy in mind for day 2.
+USER: Also I prefer walking under 8k steps per day.
+ASSISTANT: I will keep routes compact.
+USER: What about dessert options on day 2?
+ASSISTANT: I can suggest mochi and fruit ices from dedicated shops.
+USER: Please refine the day 2 food list.
+ASSISTANT: Refining with the allergy constraint still active.
+</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="part-b-pre-compaction-flush-summarize-and-evict">Part B — Pre-compaction flush + summarize-and-evict<a class="headerlink" href="#part-b-pre-compaction-flush-summarize-and-evict" title="Permanent link">&para;</a></h2>
+<p>Before we destroy the cold span, we externalize must-keep facts into the durable <code>FactStore</code>. Then we summarize the oldest live messages and splice a short synopsis back.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="n">MUST_ANSWER</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span><span class="s2">&quot;What allergy must the food plan respect?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;peanut&quot;</span><span class="p">,)),</span>
+    <span class="p">(</span><span class="s2">&quot;What is the step budget preference?&quot;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;8k&quot;</span><span class="p">,</span> <span class="s2">&quot;8000&quot;</span><span class="p">)),</span>
+<span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">llm</span><span class="p">(</span><span class="n">prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">max_tokens</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">400</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">complete</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="n">max_tokens</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">probe_passes</span><span class="p">(</span><span class="n">answer</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">needles</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;True if any needle appears; treat Nk / N000 / N,000 as equivalent.&quot;&quot;&quot;</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">answer</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="n">compact</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[\s,\u202f]&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">needle</span> <span class="ow">in</span> <span class="n">needles</span><span class="p">:</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">needle</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">text</span> <span class="ow">or</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">compact</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;k&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">n</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span><span class="n">n</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;000&quot;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">compact</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">n</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span> <span class="ow">and</span> <span class="n">n</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;000&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">n</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span><span class="si">}</span><span class="s2">k&quot;</span> <span class="ow">in</span> <span class="n">compact</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+
+
+<span class="n">_VALID_IMPORTANCE</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">&quot;HIGH&quot;</span><span class="p">,</span> <span class="s2">&quot;MEDIUM&quot;</span><span class="p">,</span> <span class="s2">&quot;LOW&quot;</span><span class="p">})</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">normalize_extracted</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Coerce a JSON element to {text, importance}; default importance MEDIUM.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fact&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">importance</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;importance&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;MEDIUM&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">importance</span> <span class="o">=</span> <span class="s2">&quot;MEDIUM&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">importance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_VALID_IMPORTANCE</span><span class="p">:</span>
+        <span class="n">importance</span> <span class="o">=</span> <span class="s2">&quot;MEDIUM&quot;</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span> <span class="s2">&quot;importance&quot;</span><span class="p">:</span> <span class="n">importance</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">pre_compaction_flush</span><span class="p">(</span><span class="n">context</span><span class="p">:</span> <span class="n">ToyContext</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="n">FactStore</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Externalize essentials BEFORE lossy compression (encode-and-store).&quot;&quot;&quot;</span>
+    <span class="n">prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">Extract durable constraints/preferences from this conversation as a JSON array of objects:</span>
+<span class="se">{{</span><span class="s2">&quot;text&quot;: &quot;&lt;fact&gt;&quot;, &quot;importance&quot;: &quot;HIGH&quot;|&quot;MEDIUM&quot;|&quot;LOW&quot;</span><span class="se">}}</span><span class="s2">.</span>
+<span class="s2">Focus on allergies, hard constraints, and stable preferences.</span>
+<span class="s2">Assign HIGH for safety/medical constraints, MEDIUM for stable preferences, LOW for soft notes.</span>
+<span class="s2">Return ONLY JSON.</span>
+
+<span class="s2">Conversation:</span>
+<span class="si">{</span><span class="n">context</span><span class="o">.</span><span class="n">render</span><span class="p">()</span><span class="si">}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+    <span class="n">raw</span> <span class="o">=</span> <span class="n">llm</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">800</span><span class="p">)</span>
+    <span class="n">fence</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;```(?:json)?\s*(.*?)```&quot;</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fence</span><span class="p">:</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">fence</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">facts</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\[.*\]&quot;</span><span class="p">,</span> <span class="n">raw</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+        <span class="n">facts</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span> <span class="k">if</span> <span class="n">m</span> <span class="k">else</span> <span class="p">[]</span>
+    <span class="n">kept</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">facts</span><span class="p">:</span>
+        <span class="n">fact</span> <span class="o">=</span> <span class="n">normalize_extracted</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">fact</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">store</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fact</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">],</span> <span class="n">importance</span><span class="o">=</span><span class="n">fact</span><span class="p">[</span><span class="s2">&quot;importance&quot;</span><span class="p">],</span> <span class="n">provenance</span><span class="o">=</span><span class="s2">&quot;pre-compaction-flush&quot;</span><span class="p">)</span>
+        <span class="n">kept</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fact</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">kept</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">summarize_span</span><span class="p">(</span><span class="n">span</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">Summarize the following dialogue span for an agent continuing the task.</span>
+<span class="s2">Prioritize allergies, constraints, decisions, and open todos. Max 60 words.</span>
+
+<span class="s2">Span:</span>
+<span class="si">{</span><span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">span</span><span class="p">)</span><span class="si">}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">llm</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">400</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">answer_probe</span><span class="p">(</span><span class="n">context</span><span class="p">:</span> <span class="n">ToyContext</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="n">FactStore</span><span class="p">,</span> <span class="n">question</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="n">memories</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">render_for_prompt</span><span class="p">(</span><span class="n">store</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
+    <span class="n">prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">Answer the question using ONLY the context and memories. Be concise.</span>
+
+<span class="s2">Memories:</span>
+<span class="si">{</span><span class="n">memories</span><span class="si">}</span>
+
+<span class="s2">Context:</span>
+<span class="si">{</span><span class="n">context</span><span class="o">.</span><span class="n">render</span><span class="p">()</span><span class="si">}</span>
+
+<span class="s2">Question: </span><span class="si">{</span><span class="n">question</span><span class="si">}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">llm</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">128</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">compact_if_needed</span><span class="p">(</span><span class="n">context</span><span class="p">:</span> <span class="n">ToyContext</span><span class="p">,</span> <span class="n">store</span><span class="p">:</span> <span class="n">FactStore</span><span class="p">,</span> <span class="n">budget</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">BUDGET</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">THRESHOLD</span><span class="p">):</span>
+    <span class="n">live</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">live_tokens</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;live tokens=</span><span class="si">{</span><span class="n">live</span><span class="si">}</span><span class="s2"> threshold=</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">threshold</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">budget</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">live</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="n">threshold</span> <span class="o">*</span> <span class="n">budget</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Under pressure threshold — no compaction.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;compacted&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Flushing essentials to durable store...&quot;</span><span class="p">)</span>
+    <span class="n">flushed</span> <span class="o">=</span> <span class="n">pre_compaction_flush</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">store</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Flushed:&quot;</span><span class="p">,</span> <span class="n">flushed</span><span class="p">)</span>
+
+    <span class="c1"># Evict oldest half of the live span (never touch pinned).</span>
+    <span class="n">cut</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">live</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">old_span</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">live</span><span class="p">[:</span><span class="n">cut</span><span class="p">]</span>
+    <span class="n">summary</span> <span class="o">=</span> <span class="n">summarize_span</span><span class="p">(</span><span class="n">old_span</span><span class="p">)</span>
+    <span class="n">store</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">summary</span><span class="p">,</span> <span class="n">importance</span><span class="o">=</span><span class="mf">0.6</span><span class="p">,</span> <span class="n">provenance</span><span class="o">=</span><span class="s2">&quot;compaction-summary&quot;</span><span class="p">)</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">live</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;SUMMARY: </span><span class="si">{</span><span class="n">summary</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">context</span><span class="o">.</span><span class="n">live</span><span class="p">[</span><span class="n">cut</span><span class="p">:]</span>
+
+    <span class="c1"># Preservation gate</span>
+    <span class="n">failures</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">question</span><span class="p">,</span> <span class="n">needles</span> <span class="ow">in</span> <span class="n">MUST_ANSWER</span><span class="p">:</span>
+        <span class="n">got</span> <span class="o">=</span> <span class="n">answer_probe</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">store</span><span class="p">,</span> <span class="n">question</span><span class="p">)</span>
+        <span class="n">ok</span> <span class="o">=</span> <span class="n">probe_passes</span><span class="p">(</span><span class="n">got</span><span class="p">,</span> <span class="n">needles</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Probe: </span><span class="si">{</span><span class="n">question</span><span class="si">!r}</span><span class="se">\n</span><span class="s2">  answer=</span><span class="si">{</span><span class="n">got</span><span class="si">!r}</span><span class="se">\n</span><span class="s2">  pass=</span><span class="si">{</span><span class="n">ok</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">:</span>
+            <span class="n">failures</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">question</span><span class="p">,</span> <span class="n">got</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">failures</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Compaction amnesia detected: </span><span class="si">{</span><span class="n">failures</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;After compaction: live=</span><span class="si">{</span><span class="n">context</span><span class="o">.</span><span class="n">live_tokens</span><span class="p">()</span><span class="si">}</span><span class="s2"> total=</span><span class="si">{</span><span class="n">context</span><span class="o">.</span><span class="n">total_tokens</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;compacted&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;summary&quot;</span><span class="p">:</span> <span class="n">summary</span><span class="p">,</span> <span class="s2">&quot;flushed&quot;</span><span class="p">:</span> <span class="n">flushed</span><span class="p">}</span>
+
+
+<span class="n">result</span> <span class="o">=</span> <span class="n">compact_if_needed</span><span class="p">(</span><span class="n">ctx</span><span class="p">,</span> <span class="n">durable</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">--- context after ---&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ctx</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">--- durable store ---&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">durable</span><span class="o">.</span><span class="n">render_for_prompt</span><span class="p">(</span><span class="n">durable</span><span class="o">.</span><span class="n">all</span><span class="p">()))</span>
+</code></pre></div>
+
+</fact></div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>live tokens=107 threshold=140
+Under pressure threshold — no compaction.
+{'compacted': False}
+
+--- context after ---
+SYSTEM: You are a careful medical-aware travel assistant.
+CORE: Never recommend food that violates a known allergy.
+USER: Planning a weekend in Osaka.
+ASSISTANT: Great — food, museums, or both?
+USER: Both. Important: I have a severe peanut allergy.
+ASSISTANT: Noted. I will avoid peanut dishes and flag shared fryers.
+USER: Day 1 should be museums; day 2 street food.
+ASSISTANT: Sounds good. I will keep the allergy in mind for day 2.
+USER: Also I prefer walking under 8k steps per day.
+ASSISTANT: I will keep routes compact.
+USER: What about dessert options on day 2?
+ASSISTANT: I can suggest mochi and fruit ices from dedicated shops.
+USER: Please refine the day 2 food list.
+ASSISTANT: Refining with the allergy constraint still active.
+
+--- durable store ---
+(no memories)
+</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="part-c-induce-compaction-amnesia-then-fix-it">Part C — Induce compaction amnesia (then fix it)<a class="headerlink" href="#part-c-induce-compaction-amnesia-then-fix-it" title="Permanent link">&para;</a></h2>
+<p>First we disable the flush and use a reckless summarizer that is told to drop "minor medical details". That should fail the preservation gate — the failure is the lesson.</p>
+<p>Then we re-run the <strong>same</strong> transcript with the correct Part B policy (flush + careful summary + probes). Must-answer facts survive.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="k">def</span><span class="w"> </span><span class="nf">reckless_compact</span><span class="p">(</span><span class="n">context</span><span class="p">:</span> <span class="n">ToyContext</span><span class="p">):</span>
+    <span class="n">cut</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">context</span><span class="o">.</span><span class="n">live</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">old_span</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">live</span><span class="p">[:</span><span class="n">cut</span><span class="p">]</span>
+    <span class="n">prompt</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">Summarize briefly. Deliberately OMIT medical details and allergies; they are minor.</span>
+<span class="s2">Span:</span>
+<span class="si">{</span><span class="nb">chr</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">old_span</span><span class="p">)</span><span class="si">}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+    <span class="n">summary</span> <span class="o">=</span> <span class="n">llm</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">120</span><span class="p">)</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">live</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;SUMMARY: </span><span class="si">{</span><span class="n">summary</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">context</span><span class="o">.</span><span class="n">live</span><span class="p">[</span><span class="n">cut</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="n">summary</span>
+
+
+<span class="c1"># Rebuild a fresh context from the same transcript for a fair fight.</span>
+<span class="n">ctx_bad</span> <span class="o">=</span> <span class="n">ToyContext</span><span class="p">(</span><span class="n">PINNED</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">role</span><span class="p">,</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">transcript</span><span class="p">:</span>
+    <span class="n">ctx_bad</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">role</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+<span class="n">empty_store</span> <span class="o">=</span> <span class="n">FactStore</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Reckless compaction (no flush, allergy-dropping prompt)...&quot;</span><span class="p">)</span>
+<span class="n">reckless_compact</span><span class="p">(</span><span class="n">ctx_bad</span><span class="p">)</span>
+<span class="n">failures</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">question</span><span class="p">,</span> <span class="n">needles</span> <span class="ow">in</span> <span class="n">MUST_ANSWER</span><span class="p">:</span>
+    <span class="n">got</span> <span class="o">=</span> <span class="n">answer_probe</span><span class="p">(</span><span class="n">ctx_bad</span><span class="p">,</span> <span class="n">empty_store</span><span class="p">,</span> <span class="n">question</span><span class="p">)</span>
+    <span class="n">ok</span> <span class="o">=</span> <span class="n">probe_passes</span><span class="p">(</span><span class="n">got</span><span class="p">,</span> <span class="n">needles</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Probe: </span><span class="si">{</span><span class="n">question</span><span class="si">!r}</span><span class="se">\n</span><span class="s2">  answer=</span><span class="si">{</span><span class="n">got</span><span class="si">!r}</span><span class="se">\n</span><span class="s2">  pass=</span><span class="si">{</span><span class="n">ok</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ok</span><span class="p">:</span>
+        <span class="n">failures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">question</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">failures</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✓ Expected failure: compaction amnesia on:&quot;</span><span class="p">,</span> <span class="n">failures</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;! Probes still passed — try a longer transcript or a stricter probe.&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>Reckless compaction (no flush, allergy-dropping prompt)...
+Probe: 'What allergy must the food plan respect?'
+  answer=''
+  pass=False
+Probe: 'What is the step budget preference?'
+  answer='Your step budget preference is to keep walking under\u202f8,000\u202fsteps per day.'
+  pass=True
+
+✓ Expected failure: compaction amnesia on: ['What allergy must the food plan respect?']
+</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="c1"># Same transcript, but with the correct policy: flush essentials, then summarize.</span>
+<span class="n">ctx_good</span> <span class="o">=</span> <span class="n">ToyContext</span><span class="p">(</span><span class="n">PINNED</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">role</span><span class="p">,</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">transcript</span><span class="p">:</span>
+    <span class="n">ctx_good</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">role</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+<span class="n">fix_store</span> <span class="o">=</span> <span class="n">FactStore</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Correct compaction (pre-flush + careful summary + preservation gate)...&quot;</span><span class="p">)</span>
+<span class="c1"># threshold=0 forces the compaction path so we can contrast with the reckless run above.</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">compact_if_needed</span><span class="p">(</span><span class="n">ctx_good</span><span class="p">,</span> <span class="n">fix_store</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">--- context after ---&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">ctx_good</span><span class="o">.</span><span class="n">render</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">--- durable store ---&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fix_store</span><span class="o">.</span><span class="n">render_for_prompt</span><span class="p">(</span><span class="n">fix_store</span><span class="o">.</span><span class="n">all</span><span class="p">()))</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>Correct compaction (pre-flush + careful summary + preservation gate)...
+live tokens=107 threshold=0
+Flushing essentials to durable store...
+Flushed: ['Severe peanut allergy – must avoid all peanut-containing dishes and shared fryers', 'Day 1 itinerary should consist of museums only', 'Day 2 itinerary should focus on street food', 'Limit walking to under 8,000 steps per day', 'Prefer dessert options on day 2 to be mochi and fruit ices from dedicated shops']
+Probe: 'What allergy must the food plan respect?'
+  answer='Severe peanut allergy.'
+  pass=True
+Probe: 'What is the step budget preference?'
+  answer='Your preference is to keep daily walking under\u202f8,000\u202fsteps.'
+  pass=True
+After compaction: live=98 total=115
+{'compacted': True, 'summary': 'User plans Osaka weekend: Day\u202f1 museums, Day\u202f2 street‑food. Severe peanut allergy – must avoid peanuts, flag shared fryers, ensure safe venues. Decisions: itinerary split by day. Open tasks: compile museum list for Day\u202f1; select peanut‑free street‑food stalls for Day\u202f2, include allergy warnings.', 'flushed': ['Severe peanut allergy – must avoid all peanut-containing dishes and shared fryers', 'Day 1 itinerary should consist of museums only', 'Day 2 itinerary should focus on street food', 'Limit walking to under 8,000 steps per day', 'Prefer dessert options on day 2 to be mochi and fruit ices from dedicated shops']}
+
+--- context after ---
+SYSTEM: You are a careful medical-aware travel assistant.
+CORE: Never recommend food that violates a known allergy.
+SUMMARY: User plans Osaka weekend: Day 1 museums, Day 2 street‑food. Severe peanut allergy – must avoid peanuts, flag shared fryers, ensure safe venues. Decisions: itinerary split by day. Open tasks: compile museum list for Day 1; select peanut‑free street‑food stalls for Day 2, include allergy warnings.
+USER: Also I prefer walking under 8k steps per day.
+ASSISTANT: I will keep routes compact.
+USER: What about dessert options on day 2?
+ASSISTANT: I can suggest mochi and fruit ices from dedicated shops.
+USER: Please refine the day 2 food list.
+ASSISTANT: Refining with the allergy constraint still active.
+
+--- durable store ---
+- (5b693248) Severe peanut allergy – must avoid all peanut-containing dishes and shared fryers
+- (07868056) Day 1 itinerary should consist of museums only
+- (7fcd5528) Day 2 itinerary should focus on street food
+- (4f14399b) Limit walking to under 8,000 steps per day
+- (909ef2ee) Prefer dessert options on day 2 to be mochi and fruit ices from dedicated shops
+- (e9517b48) User plans Osaka weekend: Day 1 museums, Day 2 street‑food. Severe peanut allergy – must avoid peanuts, flag shared fryers, ensure safe venues. Decisions: itinerary split by day. Open tasks: compile museum list for Day 1; select peanut‑free street‑food stalls for Day 2, include allergy warnings.
+</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="next-lab">Next lab<a class="headerlink" href="#next-lab" title="Permanent link">&para;</a></h2>
+<p><strong>Lab 04 — Behavioral Memory Eval</strong> zooms out from a single compaction to multi-session plant → distract → probe tests, and insists on <strong>behavior</strong>, not only retrieval hit rate.</p>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

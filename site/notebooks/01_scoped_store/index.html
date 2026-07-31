@@ -1,0 +1,1537 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="memory">
+      
+      
+        <meta name="author" content="SupportVectors">
+      
+      
+        <link rel="canonical" href="https://supportvectors.ai/memory/notebooks/01_scoped_store/">
+      
+      
+        <link rel="prev" href="../..">
+      
+      
+        <link rel="next" href="../02_write_policy/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../images/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Lab 01 — Scoped Store - SupportVectors memory</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Lora";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/supportvectors.css">
+    
+      <link rel="stylesheet" href="../../css/ansi-colours.css">
+    
+      <link rel="stylesheet" href="../../css/jupyter-cells.css">
+    
+      <link rel="stylesheet" href="../../css/pandas-dataframe.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="light-blue" data-md-color-accent="gray">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#lab-01-scoped-store-declaring-how-far-a-memory-may-travel" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SupportVectors memory" class="md-header__button md-logo" aria-label="SupportVectors memory" data-md-component="logo">
+      
+  <img src="../../images/overlapping_logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SupportVectors memory
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Lab 01 — Scoped Store
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="light-blue" data-md-color-accent="gray"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SupportVectors memory" class="md-nav__button md-logo" aria-label="SupportVectors memory" data-md-component="logo">
+      
+  <img src="../../images/overlapping_logo.png" alt="logo">
+
+    </a>
+    SupportVectors memory
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Notebooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Lab Notebooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 01 — Scoped Store
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 01 — Scoped Store
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#learning-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#theory-you-need-read-this-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Theory you need (read this first)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-a-build-a-small-concierge-agent-with-scoped-write-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part A — Build a small concierge agent with scoped write tools
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-b-happy-path-user-survives-a-new-session-bare-keys-do-not" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part B — Happy path: user: survives a new session; bare keys do not
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-c-failure-demo-alice-vs-bob-the-leak" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part C — Failure demo: Alice vs Bob (the leak)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-d-app-vs-user-vs-temp-quick-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part D — app: vs user: vs temp: quick checks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-lab" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next lab
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02_write_policy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 02 — Write-Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02b_memory_stream_retrieval/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 02b — Memory Stream Retrieval
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03_compaction_preservation_gate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 03 — Compaction + Preservation Gate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04_behavioral_memory_eval/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 04 — Behavioral Memory Eval
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05_poisoned_memory_governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 05 — Poisoned Memory & Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Project Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../project-guide/tips-and-tricks/cuda-hell/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CUDA hell
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#learning-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#theory-you-need-read-this-first" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Theory you need (read this first)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-a-build-a-small-concierge-agent-with-scoped-write-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part A — Build a small concierge agent with scoped write tools
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-b-happy-path-user-survives-a-new-session-bare-keys-do-not" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part B — Happy path: user: survives a new session; bare keys do not
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-c-failure-demo-alice-vs-bob-the-leak" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part C — Failure demo: Alice vs Bob (the leak)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-d-app-vs-user-vs-temp-quick-checks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part D — app: vs user: vs temp: quick checks
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-lab" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next lab
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script>
+(function() {
+  function addWidgetsRenderer() {
+    var requireJsScript = document.createElement('script');
+    requireJsScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js';
+
+    var mimeElement = document.querySelector('script[type="application/vnd.jupyter.widget-view+json"]');
+    var jupyterWidgetsScript = document.createElement('script');
+    var widgetRendererSrc = 'https://unpkg.com/@jupyter-widgets/html-manager@*/dist/embed-amd.js';
+    var widgetState;
+
+    // Fallback for older version:
+    try {
+      widgetState = mimeElement && JSON.parse(mimeElement.innerHTML);
+
+      if (widgetState && (widgetState.version_major < 2 || !widgetState.version_major)) {
+        widgetRendererSrc = 'jupyter-js-widgets@*/dist/embed.js';
+      }
+    } catch(e) {}
+
+    jupyterWidgetsScript.src = widgetRendererSrc;
+
+    document.body.appendChild(requireJsScript);
+    document.body.appendChild(jupyterWidgetsScript);
+  }
+
+  document.addEventListener('DOMContentLoaded', addWidgetsRenderer);
+}());
+</script>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<center>
+<img alt="No description has been provided for this image" src="https://supportvectors.ai/logo-poster-transparent.png" style="opacity:0.8" width="400px"/>
+</center>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">run</span> <span class="n">supportvectors</span><span class="o">-</span><span class="n">common</span><span class="o">.</span><span class="n">ipynb</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_html rendered_html output_subarea">
+
+<!-- Many of the styles here are inspired by: 
+    https://towardsdatascience.com/10-practical-tips-you-need-to-know-to-personalize-jupyter-notebook-fbd202777e20 
+
+
+    On the author's local machine, these exist in the custom.css file. However, in order to keep uniform look and feel, 
+    and at the request of participants, I have added it to this common import-file here.
+
+    -->
+
+
+<link href="https://fonts.googleapis.com/css?family=Lora:400,700|Montserrat:300" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro&amp;family=Literata&amp;display=swap" rel="stylesheet"/>
+<style>
+
+
+#ipython_notebook::before{
+ content:"Neural Architectures";
+        color: white;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-family: 'Lora',serif;
+        font-size:16pt;
+        margin-bottom:15px;
+        margin-top:15px;
+
+}
+body > #header {
+    #background: #D15555;
+    background: linear-gradient(to bottom, indianred 0%, #fff 100%);
+    opacity: 0.8;
+
+}
+
+
+.navbar-default .navbar-nav > li > a, #kernel_indicator {
+    color: white;
+    transition: all 0.25s;
+    font-size:10pt;
+    font-family: sans-serif;
+    font-weight:normal;
+}
+.navbar-default {
+    padding-left:100px;
+    background: none;
+    border: none;
+}
+
+
+body > menubar-container {
+    background-color: wheat;
+}
+#ipython_notebook img{                                                                                        
+    display:block; 
+
+    background: url("https://www.supportvectors.com/wp-content/uploads/2016/03/logo-poster-smaller.png") no-repeat;
+    background-size: contain;
+
+    padding-left: 600px;
+    padding-right: 100px;
+
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+
+
+body {
+ #font-family:  'Literata', serif;
+    font-family:'Lora', san-serif;
+    text-align: justify;
+    font-weight: 400;
+    font-size: 12pt;
+}
+
+iframe{
+    width:100%;
+    min-height:600px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+# font-family: 'Montserrat', sans-serif;
+ font-family:'Lora', serif;
+ font-weight: 200;
+ text-transform: uppercase;
+ color: #EC7063 ;
+}
+
+h2 {
+    color: #000080;
+}
+
+.checkpoint_status, .autosave_status {
+    color:wheat;
+}
+
+#notebook_name {
+    font-weight: 600;
+    font-size:20pt;
+    text-variant:uppercase;
+    color: wheat; 
+    margin-right:20px;
+    margin-left:-500px;
+}
+#notebook_name:hover {
+background-color: salmon;
+}
+
+
+.dataframe { /* dataframe atau table */
+    background: white;
+    box-shadow: 0px 1px 2px #bbb;
+}
+.dataframe thead th, .dataframe tbody td {
+    text-align: center;
+    padding: 1em;
+}
+
+.checkpoint_status, .autosave_status {
+    color:wheat;
+}
+
+.output {
+    align-items: center;
+}
+
+div.cell {
+    transition: all 0.25s;
+    border: none;
+    position: relative;
+    top: 0;
+}
+div.cell.selected, div.cell.selected.jupyter-soft-selected {
+    border: none;
+    background: transparent;
+    box-shadow: 0 6px 18px #aaa;
+    z-index: 10;
+    top: -10px;
+}
+.CodeMirror pre, .CodeMirror-dialog, .CodeMirror-dialog .CodeMirror-search-field, .terminal-app .terminal {
+    font-family: 'Hack' , serif; 
+    font-weight: 500;
+    font-size: 14pt;
+}
+
+
+
+</style>
+</div>
+</div>
+<div class="output_area">
+<div style="color:#aaa;font-size:8pt">
+
+<hr/>
+
+
+© SupportVectors. All rights reserved. <blockquote>This notebook is the intellectual property of SupportVectors, and part of its training material. 
+Only the participants in SupportVectors workshops are allowed to study the notebooks for educational purposes currently, but is prohibited from copying or using it for any other purposes without written permission.
+
+<p><b> These notebooks are chapters and sections from Asif Qamar's textbook that he is writing on Data Science. So we request you to not circulate the material to others.</b></p>
+</blockquote>
+
+<hr/>
+
+
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="lab-01-scoped-store-declaring-how-far-a-memory-may-travel">Lab 01 — Scoped Store: Declaring How Far a Memory May Travel<a class="headerlink" href="#lab-01-scoped-store-declaring-how-far-a-memory-may-travel" title="Permanent link">&para;</a></h1>
+<h2 id="learning-goals">Learning goals<a class="headerlink" href="#learning-goals" title="Permanent link">&para;</a></h2>
+<p>By the end of this notebook you will be able to:</p>
+<ol>
+<li>Explain why <strong>scope is access control</strong> over memory, not a fifth operation.</li>
+<li>Use ADK state-key prefixes — bare, <code>user:</code>, <code>app:</code>, <code>temp:</code> — deliberately.</li>
+<li>Demonstrate the Alice-vs-Bob leak as an <em>act of commission</em> (wrong prefix), not an accident.</li>
+<li>Confirm the lab model is <code>openai/gpt-oss-20b</code> (via <code>.env</code> / <code>model_summary()</code>).</li>
+</ol>
+<h2 id="theory-you-need-read-this-first">Theory you need (read this first)<a class="headerlink" href="#theory-you-need-read-this-first" title="Permanent link">&para;</a></h2>
+<p>The context window is the <strong>only reality</strong> the model acts on. Everything else is dormant until the harness pages it in. That dormant store must answer three questions for every fact:</p>
+<table>
+<thead>
+<tr>
+<th>Axis</th>
+<th>Question</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Who</strong></td>
+<td>Which user / agent may see this?</td>
+</tr>
+<tr>
+<td><strong>How long</strong></td>
+<td>Does it die with the turn, the session, or outlive both?</td>
+</tr>
+<tr>
+<td><strong>How shared</strong></td>
+<td>Private to one user, or visible to the whole app?</td>
+</tr>
+</tbody>
+</table>
+<p>Google ADK encodes those answers in the <strong>prefix of the state key</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Prefix</th>
+<th>Reach</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>(none)</em></td>
+<td>This <strong>session</strong> only — the scratchpad for the current conversation.</td>
+</tr>
+<tr>
+<td><code>user:</code></td>
+<td>This <strong>user</strong>, across all of their sessions in the app.</td>
+</tr>
+<tr>
+<td><code>app:</code></td>
+<td>The <strong>whole application</strong> — every user, every session.</td>
+</tr>
+<tr>
+<td><code>temp:</code></td>
+<td>This <strong>invocation</strong> only — discarded when the turn finishes.</td>
+</tr>
+</tbody>
+</table>
+<p>&gt; <strong>Note:</strong> ADK has no undivided default drawer — a leak requires choosing the wrong key on purpose.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="c1"># Supporting Python lives in src/memory (installed via `uv sync`).</span>
+<span class="c1"># Notebooks only contain the lab narrative and exercises.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">memory</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">create_session</span><span class="p">,</span>
+    <span class="n">get_session_state</span><span class="p">,</span>
+    <span class="n">load_lab_env</span><span class="p">,</span>
+    <span class="n">make_agent</span><span class="p">,</span>
+    <span class="n">make_model</span><span class="p">,</span>
+    <span class="n">make_runner</span><span class="p">,</span>
+    <span class="n">model_summary</span><span class="p">,</span>
+    <span class="n">run_turn</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">root</span> <span class="o">=</span> <span class="n">load_lab_env</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;project root:&quot;</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;LLM:&quot;</span><span class="p">,</span> <span class="n">model_summary</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">()</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>
+<code>WARNING:root:No configuration file specified. Trying the default location
+WARNING:root:Loading configuration from /Users/chandarl/memory/config.yaml if it exists
+</code>
+</pre>
+</div>
+</div>
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>project root: /Users/chandarl/memory
+LLM: endpoint=http://10.0.10.51:8000/v1  model=openai/gpt-oss-120b
+
+</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="part-a-build-a-small-concierge-agent-with-scoped-write-tools">Part A — Build a small concierge agent with scoped write tools<a class="headerlink" href="#part-a-build-a-small-concierge-agent-with-scoped-write-tools" title="Permanent link">&para;</a></h2>
+<p>We give the agent four tools. Each tool writes the <em>same kind of value</em> under a <em>different prefix</em>, so the scope choice is visible in code — not buried in prose.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">google.adk.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolContext</span>
+
+<span class="n">APP_NAME</span> <span class="o">=</span> <span class="s2">&quot;lab01_scoped_store&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">save_session_draft</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tool_context</span><span class="p">:</span> <span class="n">ToolContext</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Save a session-only draft (dies when this conversation ends).&quot;&quot;&quot;</span>
+    <span class="n">tool_context</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;draft_itinerary&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;scope&quot;</span><span class="p">:</span> <span class="s2">&quot;session&quot;</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;draft_itinerary&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">save_user_preference</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tool_context</span><span class="p">:</span> <span class="n">ToolContext</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Save a durable user preference that should follow the person across sessions.&quot;&quot;&quot;</span>
+    <span class="n">tool_context</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;user:seat_preference&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;scope&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;user:seat_preference&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">save_app_policy</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tool_context</span><span class="p">:</span> <span class="n">ToolContext</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Save an app-wide policy visible to every user.&quot;&quot;&quot;</span>
+    <span class="n">tool_context</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;app:price_disclaimer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;scope&quot;</span><span class="p">:</span> <span class="s2">&quot;app&quot;</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;app:price_disclaimer&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">save_temp_calc</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tool_context</span><span class="p">:</span> <span class="n">ToolContext</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Save an ephemeral calculation for this turn only (temp: prefix).&quot;&quot;&quot;</span>
+    <span class="n">tool_context</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;temp:proration&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;scope&quot;</span><span class="p">:</span> <span class="s2">&quot;temp&quot;</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;temp:proration&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+
+
+<span class="n">INSTRUCTION</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">You are a travel concierge that demonstrates memory scopes.</span>
+
+<span class="s2">When the user states a seating preference, call save_user_preference.</span>
+<span class="s2">When the user asks you to draft an itinerary for *this* trip, call save_session_draft.</span>
+<span class="s2">When an admin sets a global price disclaimer, call save_app_policy.</span>
+<span class="s2">When you compute a one-off number mid-turn, call save_temp_calc.</span>
+
+<span class="s2">After any tool call, reply in ONE short sentence confirming what you stored and its scope.</span>
+<span class="s2">Do not invent scopes — use the tools.</span>
+<span class="s2">Do not narrate your reasoning or plan; the user should only see the confirmation.</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">make_model</span><span class="p">()</span>
+<span class="n">agent</span> <span class="o">=</span> <span class="n">make_agent</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;scoped_concierge&quot;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+    <span class="n">instruction</span><span class="o">=</span><span class="n">INSTRUCTION</span><span class="p">,</span>
+    <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">save_session_draft</span><span class="p">,</span> <span class="n">save_user_preference</span><span class="p">,</span> <span class="n">save_app_policy</span><span class="p">,</span> <span class="n">save_temp_calc</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">runner</span><span class="p">,</span> <span class="n">sessions</span> <span class="o">=</span> <span class="n">make_runner</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">app_name</span><span class="o">=</span><span class="n">APP_NAME</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Agent ready.&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>Agent ready.
+</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="part-b-happy-path-user-survives-a-new-session-bare-keys-do-not">Part B — Happy path: <code>user:</code> survives a new session; bare keys do not<a class="headerlink" href="#part-b-happy-path-user-survives-a-new-session-bare-keys-do-not" title="Permanent link">&para;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">demo_user_vs_session</span><span class="p">():</span>
+    <span class="n">alice_s1</span> <span class="o">=</span> <span class="k">await</span> <span class="n">create_session</span><span class="p">(</span><span class="n">sessions</span><span class="p">,</span> <span class="n">app_name</span><span class="o">=</span><span class="n">APP_NAME</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="s2">&quot;alice&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Session 1 id:&quot;</span><span class="p">,</span> <span class="n">alice_s1</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+
+    <span class="n">reply</span> <span class="o">=</span> <span class="n">run_turn</span><span class="p">(</span>
+        <span class="n">runner</span><span class="p">,</span>
+        <span class="n">user_id</span><span class="o">=</span><span class="s2">&quot;alice&quot;</span><span class="p">,</span>
+        <span class="n">session_id</span><span class="o">=</span><span class="n">alice_s1</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Please remember: I always want a window seat. Also draft itinerary: Tokyo day 1 museums.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Agent:&quot;</span><span class="p">,</span> <span class="n">reply</span><span class="p">)</span>
+    <span class="n">state1</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_session_state</span><span class="p">(</span>
+        <span class="n">sessions</span><span class="p">,</span> <span class="n">app_name</span><span class="o">=</span><span class="n">APP_NAME</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="s2">&quot;alice&quot;</span><span class="p">,</span> <span class="n">session_id</span><span class="o">=</span><span class="n">alice_s1</span><span class="o">.</span><span class="n">id</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;State after session 1:&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">state1</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">k</span><span class="si">!r}</span><span class="s2">: </span><span class="si">{</span><span class="n">v</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Brand-new conversation for the same user — same SessionService process.</span>
+    <span class="n">alice_s2</span> <span class="o">=</span> <span class="k">await</span> <span class="n">create_session</span><span class="p">(</span><span class="n">sessions</span><span class="p">,</span> <span class="n">app_name</span><span class="o">=</span><span class="n">APP_NAME</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="s2">&quot;alice&quot;</span><span class="p">)</span>
+    <span class="n">state2</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_session_state</span><span class="p">(</span>
+        <span class="n">sessions</span><span class="p">,</span> <span class="n">app_name</span><span class="o">=</span><span class="n">APP_NAME</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="s2">&quot;alice&quot;</span><span class="p">,</span> <span class="n">session_id</span><span class="o">=</span><span class="n">alice_s2</span><span class="o">.</span><span class="n">id</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">State at the START of session 2 (same user, new session id):&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">state2</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">k</span><span class="si">!r}</span><span class="s2">: </span><span class="si">{</span><span class="n">v</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">assert</span> <span class="s2">&quot;user:seat_preference&quot;</span> <span class="ow">in</span> <span class="n">state2</span><span class="p">,</span> <span class="s2">&quot;user: facts must follow Alice&quot;</span>
+    <span class="k">assert</span> <span class="s2">&quot;draft_itinerary&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">state2</span><span class="p">,</span> <span class="s2">&quot;session drafts must NOT follow Alice&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✓ Assertions passed: user: survived; session draft did not.&quot;</span><span class="p">)</span>
+
+<span class="k">await</span> <span class="n">demo_user_vs_session</span><span class="p">()</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>Session 1 id: 251953cb-3887-4ade-aeeb-8e5757a48bca
+
+Agent: We need to store user preference for window seat using save_user_preference. Also draft itinerary using save_session_draft. Must call tools accordingly. After each call, respond with one short sentence confirming what stored and its scope. Probably two separate calls. First store preference, then draft. Let's do that.Now draft itinerary.User preference saved (window seat) for you; itinerary draft saved for this session.
+State after session 1:
+  'draft_itinerary': 'Tokyo day 1: visit museums'
+  'user:seat_preference': 'window seat'
+
+State at the START of session 2 (same user, new session id):
+  'user:seat_preference': 'window seat'
+
+✓ Assertions passed: user: survived; session draft did not.
+</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="part-c-failure-demo-alice-vs-bob-the-leak">Part C — Failure demo: Alice vs Bob (the leak)<a class="headerlink" href="#part-c-failure-demo-alice-vs-bob-the-leak" title="Permanent link">&para;</a></h2>
+<p>If you store Alice's preference under a <strong>bare</strong> key (or worse, under <code>app:</code>), the next user can inherit it. ADK makes that a deliberate key choice.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="c1"># Deliberately WRONG tool — for teaching only. Do not copy into production agents.</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">save_preference_badly</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tool_context</span><span class="p">:</span> <span class="n">ToolContext</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;BUGGY: writes a personal preference into session scope with a shared-looking name.&quot;&quot;&quot;</span>
+    <span class="n">tool_context</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;seat_preference&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>  <span class="c1"># missing user: prefix!</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;scope&quot;</span><span class="p">:</span> <span class="s2">&quot;session (BUG)&quot;</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;seat_preference&quot;</span><span class="p">,</span> <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value</span><span class="p">}</span>
+
+
+<span class="n">buggy_agent</span> <span class="o">=</span> <span class="n">make_agent</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;buggy_concierge&quot;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">make_model</span><span class="p">(),</span>
+    <span class="n">instruction</span><span class="o">=</span><span class="p">(</span>
+        <span class="s2">&quot;When the user states a seating preference, call save_preference_badly. &quot;</span>
+        <span class="s2">&quot;Confirm briefly.&quot;</span>
+    <span class="p">),</span>
+    <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">save_preference_badly</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">buggy_runner</span><span class="p">,</span> <span class="n">buggy_sessions</span> <span class="o">=</span> <span class="n">make_runner</span><span class="p">(</span><span class="n">buggy_agent</span><span class="p">,</span> <span class="n">app_name</span><span class="o">=</span><span class="s2">&quot;lab01_buggy&quot;</span><span class="p">)</span>
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">demo_leak</span><span class="p">():</span>
+    <span class="c1"># Simulate a naive design that copies session state into a &quot;profile&quot; bag</span>
+    <span class="c1"># without respecting prefixes — the classic retrofit mistake.</span>
+    <span class="n">shared_bag</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">alice</span> <span class="o">=</span> <span class="k">await</span> <span class="n">create_session</span><span class="p">(</span><span class="n">buggy_sessions</span><span class="p">,</span> <span class="n">app_name</span><span class="o">=</span><span class="s2">&quot;lab01_buggy&quot;</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="s2">&quot;alice&quot;</span><span class="p">)</span>
+    <span class="n">run_turn</span><span class="p">(</span>
+        <span class="n">buggy_runner</span><span class="p">,</span>
+        <span class="n">user_id</span><span class="o">=</span><span class="s2">&quot;alice&quot;</span><span class="p">,</span>
+        <span class="n">session_id</span><span class="o">=</span><span class="n">alice</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="n">message</span><span class="o">=</span><span class="s2">&quot;I prefer window seats.&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">alice_state</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_session_state</span><span class="p">(</span>
+        <span class="n">buggy_sessions</span><span class="p">,</span> <span class="n">app_name</span><span class="o">=</span><span class="s2">&quot;lab01_buggy&quot;</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="s2">&quot;alice&quot;</span><span class="p">,</span> <span class="n">session_id</span><span class="o">=</span><span class="n">alice</span><span class="o">.</span><span class="n">id</span>
+    <span class="p">)</span>
+    <span class="c1"># Naive merge: dump everything into a global bag keyed only by fact name.</span>
+    <span class="n">shared_bag</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">alice_state</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="s2">&quot;seat&quot;</span> <span class="ow">in</span> <span class="n">k</span><span class="p">})</span>
+
+    <span class="n">bob</span> <span class="o">=</span> <span class="k">await</span> <span class="n">create_session</span><span class="p">(</span><span class="n">buggy_sessions</span><span class="p">,</span> <span class="n">app_name</span><span class="o">=</span><span class="s2">&quot;lab01_buggy&quot;</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="s2">&quot;bob&quot;</span><span class="p">)</span>
+    <span class="n">bob_state</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_session_state</span><span class="p">(</span>
+        <span class="n">buggy_sessions</span><span class="p">,</span> <span class="n">app_name</span><span class="o">=</span><span class="s2">&quot;lab01_buggy&quot;</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="s2">&quot;bob&quot;</span><span class="p">,</span> <span class="n">session_id</span><span class="o">=</span><span class="n">bob</span><span class="o">.</span><span class="n">id</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Bob&#39;s ADK state at session start (correctly empty of Alice&#39;s prefs):&quot;</span><span class="p">,</span> <span class="n">bob_state</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Naive shared_bag still holding Alice&#39;s fact:&quot;</span><span class="p">,</span> <span class="n">shared_bag</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Lesson: without a user: (or equivalent) boundary, &#39;shared_bag&#39; becomes the leak.&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fix: write personal facts under user: and never promote session keys across users.&quot;</span><span class="p">)</span>
+
+<span class="k">await</span> <span class="n">demo_leak</span><span class="p">()</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>Bob's ADK state at session start (correctly empty of Alice's prefs): {}
+Naive shared_bag still holding Alice's fact: {'seat_preference': 'window seats'}
+
+Lesson: without a user: (or equivalent) boundary, 'shared_bag' becomes the leak.
+Fix: write personal facts under user: and never promote session keys across users.
+</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="part-d-app-vs-user-vs-temp-quick-checks">Part D — <code>app:</code> vs <code>user:</code> vs <code>temp:</code> quick checks<a class="headerlink" href="#part-d-app-vs-user-vs-temp-quick-checks" title="Permanent link">&para;</a></h2>
+<p><strong>Questions:</strong> which prefix each of these deserves?</p>
+<ol>
+<li>"Never quote a price without the legal disclaimer."  </li>
+<li>"Alice prefers email over phone."  </li>
+<li>"Mid-call scratch: prorated refund = $42.17."  </li>
+<li>"Half-finished itinerary for <em>this</em> booking chat."</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="n">EXPECTED</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;disclaimer&quot;</span><span class="p">:</span> <span class="s2">&quot;app:&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;channel_pref&quot;</span><span class="p">:</span> <span class="s2">&quot;user:&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;proration&quot;</span><span class="p">:</span> <span class="s2">&quot;temp:&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;itinerary_draft&quot;</span><span class="p">:</span> <span class="s2">&quot;(session / bare)&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Expected prefixes:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="n">EXPECTED</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">label</span><span class="si">:</span><span class="s2">16s</span><span class="si">}</span><span class="s2"> -&amp;gt; </span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">demo_app_and_temp</span><span class="p">():</span>
+    <span class="n">admin</span> <span class="o">=</span> <span class="k">await</span> <span class="n">create_session</span><span class="p">(</span><span class="n">sessions</span><span class="p">,</span> <span class="n">app_name</span><span class="o">=</span><span class="n">APP_NAME</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="s2">&quot;admin&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">run_turn</span><span class="p">(</span>
+        <span class="n">runner</span><span class="p">,</span>
+        <span class="n">user_id</span><span class="o">=</span><span class="s2">&quot;admin&quot;</span><span class="p">,</span>
+        <span class="n">session_id</span><span class="o">=</span><span class="n">admin</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Admin: set global price disclaimer to &#39;Taxes extra; fares not guaranteed.&#39;&quot;</span><span class="p">,</span>
+    <span class="p">))</span>
+    <span class="c1"># New user should already see app: state via the shared SessionService.</span>
+    <span class="n">cara</span> <span class="o">=</span> <span class="k">await</span> <span class="n">create_session</span><span class="p">(</span><span class="n">sessions</span><span class="p">,</span> <span class="n">app_name</span><span class="o">=</span><span class="n">APP_NAME</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="s2">&quot;cara&quot;</span><span class="p">)</span>
+    <span class="n">cara_state</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_session_state</span><span class="p">(</span>
+        <span class="n">sessions</span><span class="p">,</span> <span class="n">app_name</span><span class="o">=</span><span class="n">APP_NAME</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="s2">&quot;cara&quot;</span><span class="p">,</span> <span class="n">session_id</span><span class="o">=</span><span class="n">cara</span><span class="o">.</span><span class="n">id</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Cara&#39;s initial state (should include app:price_disclaimer):&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">cara_state</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">k</span><span class="si">!r}</span><span class="s2">: </span><span class="si">{</span><span class="n">v</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="s2">&quot;app:price_disclaimer&quot;</span> <span class="ow">in</span> <span class="n">cara_state</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">run_turn</span><span class="p">(</span>
+        <span class="n">runner</span><span class="p">,</span>
+        <span class="n">user_id</span><span class="o">=</span><span class="s2">&quot;cara&quot;</span><span class="p">,</span>
+        <span class="n">session_id</span><span class="o">=</span><span class="n">cara</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
+        <span class="n">message</span><span class="o">=</span><span class="s2">&quot;Please compute a one-off proration of 42.17 for this turn only.&quot;</span><span class="p">,</span>
+    <span class="p">))</span>
+    <span class="n">after</span> <span class="o">=</span> <span class="k">await</span> <span class="n">get_session_state</span><span class="p">(</span>
+        <span class="n">sessions</span><span class="p">,</span> <span class="n">app_name</span><span class="o">=</span><span class="n">APP_NAME</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="s2">&quot;cara&quot;</span><span class="p">,</span> <span class="n">session_id</span><span class="o">=</span><span class="n">cara</span><span class="o">.</span><span class="n">id</span>
+    <span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">After temp write (temp: may already be gone — that is correct):&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">after</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">k</span><span class="si">!r}</span><span class="s2">: </span><span class="si">{</span><span class="n">v</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">✓ app: is shared; temp: is not a durable drawer.&quot;</span><span class="p">)</span>
+
+<span class="k">await</span> <span class="n">demo_app_and_temp</span><span class="p">()</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>Expected prefixes:
+  disclaimer       -&gt; app:
+  channel_pref     -&gt; user:
+  proration        -&gt; temp:
+  itinerary_draft  -&gt; (session / bare)
+We need to call save_app_policy with value being the disclaimer. Then respond with one short sentence confirming what stored and its scope. So call save_app_policy.Saved global price disclaimer (app scope).
+
+Cara's initial state (should include app:price_disclaimer):
+  'app:price_disclaimer': 'Taxes extra; fares not guaranteed.'
+We need to compute a one-off number mid-turn, then store using save_temp_calc. The user asks to compute a one-off proration of 42.17 for this turn only. Likely they want to store the result? The instruction: "When you compute a one-off number mid-turn, call save_temp_calc." So we need to compute something: "proration of 42.17". Not clear what operation. Probably just store the value 42.17? Or maybe compute something like 42.17 * something? The user didn't specify further. Probably they just want to store the number 42.17 as a temp calc. So call save_temp_calc with value "42.17". Then respond with one short sentence confirming what stored and its scope. Eg: "Saved temporary calculation 42.17 for this turn."Saved temporary calculation 42.17 for this turn.
+
+After temp write (temp: may already be gone — that is correct):
+  'app:price_disclaimer': 'Taxes extra; fares not guaranteed.'
+
+✓ app: is shared; temp: is not a durable drawer.
+</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="next-lab">Next lab<a class="headerlink" href="#next-lab" title="Permanent link">&para;</a></h2>
+<p><strong>Lab 02 — Write-Policy</strong> asks a harder question: <em>given</em> a scope, which raw turns are even worth remembering?</p>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>

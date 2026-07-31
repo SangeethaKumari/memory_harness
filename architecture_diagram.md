@@ -1,6 +1,6 @@
 # Agent Memory System Architecture
 
-This document details the software architecture, core components, and data flows of the **Agent Memory Labs** built with the Google Agent Development Kit (ADK). The architecture is designed to address complex memory challenges: scope management, write-time reconciliation, multi-factor retrieval scoring, context compaction gates, and memory-time governance.
+This document details the software architecture, core components, and data flows of the **Agent Memory Labs** built with the Google Agent Development Kit (ADK). The architecture is designed to address complex memory challenges: scope management, write-time reconciliation, multi-factor retrieval scoring, context compaction gates, behavioral evaluation (plant → distract → probe), and memory-time governance.
 
 ---
 
@@ -142,7 +142,85 @@ flowchart TD
 
 ---
 
-## 6. Write-Time Memory Governance (Lab 05)
+## 6. Behavioral Memory Evaluation Pipeline (Lab 04)
+
+Evaluating memory requires separating **retrieval metrics** (did the fact surface into context?) from **behavioral metrics** (did the agent act on the fact correctly?). A scenario follows a three-act lifecycle (**Plant → Distract → Probe**) across isolated sessions while sharing durable memory.
+
+```mermaid
+flowchart TD
+    subgraph Scenario ["Scenario Lifecycle (Plant -> Distract -> Probe)"]
+        S1["Session 1: Plant Act"] -->|"User Turn: Plant Fact"| Rec1["extract_and_reconcile()"]
+        Rec1 -->|"ADD / UPDATE"| Store[("Durable FactStore")]
+        
+        S2["Session 2: Distract Act"] -->|"User Turn: Distractor / Update"| Rec2["extract_and_reconcile()"]
+        Rec2 -->|"Evaluate & Store / Tombstone"| Store
+        
+        S3["Session 3: Probe Act\n(Clean Dialogue Session)"] -->|"User Turn: Probe Question"| Agent["ADK Agent Turn Execution"]
+        Agent -->|"Tool Call: recall_relevant()"| Store
+        Store -->|"Return Active Non-Superseded Facts"| Agent
+        Agent -->|"Generate Reply"| ProbeReply["Probe Reply Output"]
+    end
+    
+    subgraph DualEval ["Dual Metric Evaluation Engine"]
+        Store --> ActiveFacts["Active Facts List"]
+        
+        ActiveFacts --> CheckRetr{"Expected Fact Needle\nin Store?"}
+        ProbeReply --> CheckBeh{"Expected Needle Present &\nForbidden Needle Absent?"}
+        
+        CheckRetr -->|"Yes / No"| RetrResult["Retrieval Pass Metric"]
+        CheckBeh -->|"Yes / No"| BehResult["Behavior Pass Metric"]
+        
+        RetrResult --> Matrix["Scoreboard & Diagnostic Matrix\n(Retrieval Hit-Rate vs Behavior Success)"]
+        BehResult --> Matrix
+    end
+```
+
+### Multi-Session Evaluation Sequence
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Eval as Eval Harness
+    participant Sess1 as Session 1 (Plant)
+    participant Sess2 as Session 2 (Distract)
+    participant Sess3 as Session 3 (Probe)
+    participant Store as Durable FactStore
+    participant Agent as ADK Agent
+
+    rect rgb(240, 248, 255)
+        note over Eval, Store: Act 1: Plant
+        Eval->>Sess1: User Turn ("I am vegetarian")
+        Sess1->>Store: extract_and_reconcile() -> ADD "user is vegetarian"
+    end
+
+    rect rgb(255, 250, 240)
+        note over Eval, Store: Act 2: Distract
+        Eval->>Sess2: User Turn ("My brother loves steak")
+        Sess2->>Store: extract_and_reconcile() -> ADD "brother loves steak"
+    end
+
+    rect rgb(240, 255, 240)
+        note over Eval, Agent: Act 3: Probe
+        Eval->>Sess3: User Turn ("Recommend a dinner dish")
+        Sess3->>Agent: Run Turn (Fresh Session Dialogue Context)
+        Agent->>Store: recall_relevant("dinner")
+        Store-->>Agent: Returns ["user is vegetarian"]
+        Agent-->>Eval: Probe Reply ("I recommend a delicious vegetarian pasta...")
+    end
+
+    rect rgb(255, 240, 245)
+        note over Eval, Scoreboard: Dual Metric Assessment
+        Eval->>Eval: Check Store: Is "vegetarian" active in FactStore? -> retrieval_pass=True
+        Eval->>Eval: Check Reply: Contains "vegetarian" & lacks "steak"? -> behavior_pass=True
+    end
+```
+
+- **Retrieval Floor vs. Behavioral Success**: Retrieval@k measures if the plumbing brought the fact to prompt context. Behavioral success measures if the agent followed instructions and acted on the fact.
+- **Diagnostic Rule of Thumb**: If `retrieval_pass=True` but `behavior_pass=False`, the bug lies in instruction following or prompt interference rather than storage.
+
+---
+
+## 7. Write-Time Memory Governance (Lab 05)
 
 When agents write memories based on external tools, user input, or web documents, they are exposed to **indirect prompt injection** (poisoned memories). The governor serves as a gatekeeper.
 
@@ -164,3 +242,4 @@ flowchart TD
 ```
 
 - **Quarantine**: Instead of silently dropping toxic instructions (which makes debugging hard), facts are quarantined with metadata details, allowing developers to trace the source of the prompt injection.
+

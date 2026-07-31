@@ -1,0 +1,1695 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="memory">
+      
+      
+        <meta name="author" content="SupportVectors">
+      
+      
+        <link rel="canonical" href="https://supportvectors.ai/memory/notebooks/02_write_policy/">
+      
+      
+        <link rel="prev" href="../01_scoped_store/">
+      
+      
+        <link rel="next" href="../02b_memory_stream_retrieval/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../images/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+    
+    
+      
+        <title>Lab 02 — Write-Policy - SupportVectors memory</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Lora";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+      <link rel="stylesheet" href="../../stylesheets/supportvectors.css">
+    
+      <link rel="stylesheet" href="../../css/ansi-colours.css">
+    
+      <link rel="stylesheet" href="../../css/jupyter-cells.css">
+    
+      <link rel="stylesheet" href="../../css/pandas-dataframe.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="light-blue" data-md-color-accent="gray">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#lab-02-write-policy-extract-salience-reconcile" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="SupportVectors memory" class="md-header__button md-logo" aria-label="SupportVectors memory" data-md-component="logo">
+      
+  <img src="../../images/overlapping_logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            SupportVectors memory
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Lab 02 — Write-Policy
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="light-blue" data-md-color-accent="gray"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="SupportVectors memory" class="md-nav__button md-logo" aria-label="SupportVectors memory" data-md-component="logo">
+      
+  <img src="../../images/overlapping_logo.png" alt="logo">
+
+    </a>
+    SupportVectors memory
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab Notebooks
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Lab Notebooks
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../01_scoped_store/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 01 — Scoped Store
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 02 — Write-Policy
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 02 — Write-Policy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#learning-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#theory-you-need" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Theory you need
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-a-the-extractor-llm-and-the-salience-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part A — The extractor (LLM) and the salience gate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-b-reconcile-against-neighbours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part B — Reconcile against neighbours
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-c-drive-the-policy-with-an-adk-agent-hot-path-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part C — Drive the policy with an ADK agent (hot-path tool)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-d-inspect-the-append-log-vs-the-recall-store" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part D — Inspect the append-log vs the recall store
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-lab" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next lab
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../02b_memory_stream_retrieval/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 02b — Memory Stream Retrieval
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../03_compaction_preservation_gate/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 03 — Compaction + Preservation Gate
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../04_behavioral_memory_eval/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 04 — Behavioral Memory Eval
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../05_poisoned_memory_governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Lab 05 — Poisoned Memory & Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Project Guide
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Project Guide
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../project-guide/tips-and-tricks/cuda-hell/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CUDA hell
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#learning-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Learning goals
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#theory-you-need" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Theory you need
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-a-the-extractor-llm-and-the-salience-gate" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part A — The extractor (LLM) and the salience gate
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-b-reconcile-against-neighbours" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part B — Reconcile against neighbours
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-c-drive-the-policy-with-an-adk-agent-hot-path-tool" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part C — Drive the policy with an ADK agent (hot-path tool)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#part-d-inspect-the-append-log-vs-the-recall-store" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Part D — Inspect the append-log vs the recall store
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-lab" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next lab
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+<script>
+(function() {
+  function addWidgetsRenderer() {
+    var requireJsScript = document.createElement('script');
+    requireJsScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js';
+
+    var mimeElement = document.querySelector('script[type="application/vnd.jupyter.widget-view+json"]');
+    var jupyterWidgetsScript = document.createElement('script');
+    var widgetRendererSrc = 'https://unpkg.com/@jupyter-widgets/html-manager@*/dist/embed-amd.js';
+    var widgetState;
+
+    // Fallback for older version:
+    try {
+      widgetState = mimeElement && JSON.parse(mimeElement.innerHTML);
+
+      if (widgetState && (widgetState.version_major < 2 || !widgetState.version_major)) {
+        widgetRendererSrc = 'jupyter-js-widgets@*/dist/embed.js';
+      }
+    } catch(e) {}
+
+    jupyterWidgetsScript.src = widgetRendererSrc;
+
+    document.body.appendChild(requireJsScript);
+    document.body.appendChild(jupyterWidgetsScript);
+  }
+
+  document.addEventListener('DOMContentLoaded', addWidgetsRenderer);
+}());
+</script>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<center>
+<img alt="No description has been provided for this image" src="https://supportvectors.ai/logo-poster-transparent.png" style="opacity:0.8" width="400px"/>
+</center>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="o">%</span><span class="n">run</span> <span class="n">supportvectors</span><span class="o">-</span><span class="n">common</span><span class="o">.</span><span class="n">ipynb</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_html rendered_html output_subarea">
+
+<!-- Many of the styles here are inspired by: 
+    https://towardsdatascience.com/10-practical-tips-you-need-to-know-to-personalize-jupyter-notebook-fbd202777e20 
+
+
+    On the author's local machine, these exist in the custom.css file. However, in order to keep uniform look and feel, 
+    and at the request of participants, I have added it to this common import-file here.
+
+    -->
+
+
+<link href="https://fonts.googleapis.com/css?family=Lora:400,700|Montserrat:300" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro&amp;family=Literata&amp;display=swap" rel="stylesheet"/>
+<style>
+
+
+#ipython_notebook::before{
+ content:"Neural Architectures";
+        color: white;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-family: 'Lora',serif;
+        font-size:16pt;
+        margin-bottom:15px;
+        margin-top:15px;
+
+}
+body > #header {
+    #background: #D15555;
+    background: linear-gradient(to bottom, indianred 0%, #fff 100%);
+    opacity: 0.8;
+
+}
+
+
+.navbar-default .navbar-nav > li > a, #kernel_indicator {
+    color: white;
+    transition: all 0.25s;
+    font-size:10pt;
+    font-family: sans-serif;
+    font-weight:normal;
+}
+.navbar-default {
+    padding-left:100px;
+    background: none;
+    border: none;
+}
+
+
+body > menubar-container {
+    background-color: wheat;
+}
+#ipython_notebook img{                                                                                        
+    display:block; 
+
+    background: url("https://www.supportvectors.com/wp-content/uploads/2016/03/logo-poster-smaller.png") no-repeat;
+    background-size: contain;
+
+    padding-left: 600px;
+    padding-right: 100px;
+
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+
+
+body {
+ #font-family:  'Literata', serif;
+    font-family:'Lora', san-serif;
+    text-align: justify;
+    font-weight: 400;
+    font-size: 12pt;
+}
+
+iframe{
+    width:100%;
+    min-height:600px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+# font-family: 'Montserrat', sans-serif;
+ font-family:'Lora', serif;
+ font-weight: 200;
+ text-transform: uppercase;
+ color: #EC7063 ;
+}
+
+h2 {
+    color: #000080;
+}
+
+.checkpoint_status, .autosave_status {
+    color:wheat;
+}
+
+#notebook_name {
+    font-weight: 600;
+    font-size:20pt;
+    text-variant:uppercase;
+    color: wheat; 
+    margin-right:20px;
+    margin-left:-500px;
+}
+#notebook_name:hover {
+background-color: salmon;
+}
+
+
+.dataframe { /* dataframe atau table */
+    background: white;
+    box-shadow: 0px 1px 2px #bbb;
+}
+.dataframe thead th, .dataframe tbody td {
+    text-align: center;
+    padding: 1em;
+}
+
+.checkpoint_status, .autosave_status {
+    color:wheat;
+}
+
+.output {
+    align-items: center;
+}
+
+div.cell {
+    transition: all 0.25s;
+    border: none;
+    position: relative;
+    top: 0;
+}
+div.cell.selected, div.cell.selected.jupyter-soft-selected {
+    border: none;
+    background: transparent;
+    box-shadow: 0 6px 18px #aaa;
+    z-index: 10;
+    top: -10px;
+}
+.CodeMirror pre, .CodeMirror-dialog, .CodeMirror-dialog .CodeMirror-search-field, .terminal-app .terminal {
+    font-family: 'Hack' , serif; 
+    font-weight: 500;
+    font-size: 14pt;
+}
+
+
+
+</style>
+</div>
+</div>
+<div class="output_area">
+<div style="color:#aaa;font-size:8pt">
+
+<hr/>
+
+
+© SupportVectors. All rights reserved. <blockquote>This notebook is the intellectual property of SupportVectors, and part of its training material. 
+Only the participants in SupportVectors workshops are allowed to study the notebooks for educational purposes currently, but is prohibited from copying or using it for any other purposes without written permission.
+
+<p><b> These notebooks are chapters and sections from Asif Qamar's textbook that he is writing on Data Science. So we request you to not circulate the material to others.</b></p>
+</blockquote>
+
+<hr/>
+
+
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h1 id="lab-02-write-policy-extract-salience-reconcile">Lab 02 — Write-Policy: Extract → Salience → Reconcile<a class="headerlink" href="#lab-02-write-policy-extract-salience-reconcile" title="Permanent link">&para;</a></h1>
+<h2 id="learning-goals">Learning goals<a class="headerlink" href="#learning-goals" title="Permanent link">&para;</a></h2>
+<ol>
+<li>Treat a memory write as <strong>reconciliation</strong>, not a blind insert.</li>
+<li>Implement the four resolutions: <strong>ADD / UPDATE / DELETE(tombstone) / NOOP</strong>.</li>
+<li>Separate the <strong>append-log</strong> (lossless ground truth) from the <strong>recall store</strong> (salient facts only).</li>
+<li>Prefer <strong>background</strong> consolidation over hot-path extraction when latency matters.</li>
+<li>Assign <strong>importance</strong> <span class="arithmatex">\([0, 1]\)</span> at write time so later retrieval (Lab 02b) has something to spend.</li>
+</ol>
+<h2 id="theory-you-need">Theory you need<a class="headerlink" href="#theory-you-need" title="Permanent link">&para;</a></h2>
+<p>A memory store is only as good as what you chose to put in it. The default failure is not <em>too little</em> memory but <em>too much of the wrong kind</em> — transient chatter, near-duplicates, and unresolved contradictions ("likes tea" sitting next to "prefers coffee now").</p>
+<p>A healthy write-policy has two axes:</p>
+<table>
+<thead>
+<tr>
+<th>Axis</th>
+<th>Question</th>
+<th>Rule of thumb</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>When</strong></td>
+<td>Hot-path (during the turn) or background (after)?</td>
+<td>Most writing should be background; hot-path is the exception you justify.</td>
+</tr>
+<tr>
+<td><strong>What</strong></td>
+<td>Is this worth recalling three sessions from now?</td>
+<td>If not, keep it only in the append-log. How much? Score importance <span class="arithmatex">\(0\)</span>–<span class="arithmatex">\(1\)</span> at extract time (<span class="arithmatex">\(0.5\)</span> = medium).</td>
+</tr>
+</tbody>
+</table>
+<p>Pipeline (per turn):</p>
+<div class="highlight"><pre><span></span><code>raw turn  →  extract atomic facts + importance  →  salience gate  →  reconcile vs neighbours
+                                                                    ├─ NOOP
+                                                                    ├─ UPDATE (tombstone + ADD successor)
+                                                                    ├─ DELETE (tombstone + ADD successor)
+                                                                    └─ ADD
+</code></pre></div>
+<p>On change or contradiction: <strong>invalidate with a timestamp, do not erase.</strong> Supersession leaves a scar — including UPDATE — so "liked tea" remains visible after a later coffee preference; silent in-place rewrite lies about history.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+</code></pre></div>
+
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="c1"># Supporting Python lives in src/memory (installed via `uv sync`).</span>
+<span class="c1"># Notebooks only contain the lab narrative and exercises.</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">google.adk.tools</span><span class="w"> </span><span class="kn">import</span> <span class="n">ToolContext</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">memory</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">FactStore</span><span class="p">,</span>
+    <span class="n">complete</span><span class="p">,</span>
+    <span class="n">create_session</span><span class="p">,</span>
+    <span class="n">load_lab_env</span><span class="p">,</span>
+    <span class="n">make_agent</span><span class="p">,</span>
+    <span class="n">make_model</span><span class="p">,</span>
+    <span class="n">make_runner</span><span class="p">,</span>
+    <span class="n">model_summary</span><span class="p">,</span>
+    <span class="n">run_turn</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">load_lab_env</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;LLM:&quot;</span><span class="p">,</span> <span class="n">model_summary</span><span class="p">())</span>
+<span class="n">store</span> <span class="o">=</span> <span class="n">FactStore</span><span class="p">()</span>
+<span class="n">append_log</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># lossless ground truth — never edited in place</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Fresh FactStore + append-log ready.&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_subarea output_stream output_stderr output_text">
+<pre>
+<code>WARNING:root:No configuration file specified. Trying the default location
+WARNING:root:Loading configuration from /Users/chandarl/memory/config.yaml if it exists
+</code>
+</pre>
+</div>
+</div>
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>LLM: endpoint=http://10.0.10.51:8000/v1  model=openai/gpt-oss-120b
+Fresh FactStore + append-log ready.
+</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="part-a-the-extractor-llm-and-the-salience-gate">Part A — The extractor (LLM) and the salience gate<a class="headerlink" href="#part-a-the-extractor-llm-and-the-salience-gate" title="Permanent link">&para;</a></h2>
+<p>We ask the model for <strong>atomic, standalone</strong> facts with pronouns already resolved — and an <strong>importance</strong> score in <span class="arithmatex">\([0, 1]\)</span> judged at write time. A memory that says "she said yes" is useless three sessions later; a store where every fact is <code>0.5</code> cannot power Lab 02b's retrieval ranking.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="n">EXTRACT_PROMPT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">You extract durable personal facts from a dialogue turn for a long-term memory store.</span>
+
+<span class="s2">Rules:</span>
+<span class="s2">- Return ONLY a JSON array of objects:</span>
+<span class="s2">  {{&quot;text&quot;: &quot;&lt;atomic fact=&quot;&quot;&gt;&quot;, &quot;importance&quot;: &lt;float 0.0-1.0=&quot;&quot;&gt;}}</span>
+<span class="s2">- Each text must be atomic and self-contained (resolve pronouns to names).</span>
+<span class="s2">- Keep stable preferences, identity facts, constraints, and decisions.</span>
+<span class="s2">- DROP pleasantries, one-off clarifications, and pure small-talk.</span>
+<span class="s2">- If nothing durable is present, return [].</span>
+
+<span class="s2">Importance scale (float):</span>
+<span class="s2">- 0.0 = no lasting value (prefer dropping instead of emitting)</span>
+<span class="s2">- 0.5 = medium — ordinary durable preference or identity detail</span>
+<span class="s2">- 1.0 = highest — safety/medical constraints, hard requirements, critical identity</span>
+<span class="s2">Score continuously; allergies/constraints near 0.9–1.0, seat/diet prefs near 0.5–0.7,</span>
+<span class="s2">soft likes near 0.3–0.5.</span>
+
+<span class="s2">Turn:</span>
+<span class="s2">&quot;</span><span class="si">{turn}</span><span class="s2">&quot;</span>
+
+<span class="s2">User name for pronoun resolution: </span><span class="si">{user_name}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_json_payload</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Best-effort JSON parse; tolerates fenced markdown from the model.&quot;&quot;&quot;</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="n">fence</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;```(?:json)?\s*(.*?)```&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">fence</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">fence</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">:</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\[.*\]|\{.*\}&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">DOTALL</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">m</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">salience_ok</span><span class="p">(</span><span class="n">fact</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Heuristic stand-in for &#39;would this matter three sessions from now?&#39;&quot;&quot;&quot;</span>
+    <span class="n">ephemeral</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">,</span> <span class="s2">&quot;thanks&quot;</span><span class="p">,</span> <span class="s2">&quot;thank you&quot;</span><span class="p">,</span> <span class="s2">&quot;how are you&quot;</span><span class="p">,</span> <span class="s2">&quot;lol&quot;</span><span class="p">,</span> <span class="s2">&quot;ok&quot;</span><span class="p">,</span> <span class="s2">&quot;okay&quot;</span><span class="p">)</span>
+    <span class="n">low</span> <span class="o">=</span> <span class="n">fact</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">any</span><span class="p">(</span><span class="n">tok</span> <span class="ow">in</span> <span class="n">low</span> <span class="k">for</span> <span class="n">tok</span> <span class="ow">in</span> <span class="n">ephemeral</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">low</span><span class="o">.</span><span class="n">split</span><span class="p">())</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span> <span class="mi">6</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_clamp_importance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">default</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">score</span><span class="p">))</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">normalize_extracted</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Coerce a JSON element to {text, importance}; default importance 0.5.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;text&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fact&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">importance</span> <span class="o">=</span> <span class="n">_clamp_importance</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;importance&quot;</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="n">importance</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="n">text</span><span class="p">,</span> <span class="s2">&quot;importance&quot;</span><span class="p">:</span> <span class="n">importance</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_facts</span><span class="p">(</span><span class="n">turn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">user_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Ada&quot;</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return [{text, importance}, ...] after salience filtering.&quot;&quot;&quot;</span>
+    <span class="n">raw</span> <span class="o">=</span> <span class="n">complete</span><span class="p">(</span><span class="n">EXTRACT_PROMPT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">turn</span><span class="o">=</span><span class="n">turn</span><span class="p">,</span> <span class="n">user_name</span><span class="o">=</span><span class="n">user_name</span><span class="p">),</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">512</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">parse_json_payload</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="n">facts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">fact</span> <span class="o">=</span> <span class="n">normalize_extracted</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fact</span> <span class="ow">and</span> <span class="n">salience_ok</span><span class="p">(</span><span class="n">fact</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]):</span>
+            <span class="n">facts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fact</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">facts</span>
+
+
+<span class="c1"># Smoke test</span>
+<span class="n">demo_turn</span> <span class="o">=</span> <span class="s2">&quot;Hi! By the way I am vegetarian and I prefer aisle seats on long flights.&quot;</span>
+<span class="n">facts</span> <span class="o">=</span> <span class="n">extract_facts</span><span class="p">(</span><span class="n">demo_turn</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Extracted:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">facts</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  [</span><span class="si">{</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;importance&#39;</span><span class="p">]</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">f</span><span class="p">[</span><span class="s1">&#39;text&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+</float></atomic></div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>Extracted:
+  [0.80] Ada is vegetarian
+  [0.55] Ada prefers aisle seats on long flights
+</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="part-b-reconcile-against-neighbours">Part B — Reconcile against neighbours<a class="headerlink" href="#part-b-reconcile-against-neighbours" title="Permanent link">&para;</a></h2>
+<p>For each candidate fact we retrieve near neighbours with a <strong>sentence-transformer</strong> (top-k by cosine similarity) and ask the LLM to pick an op. Keyword overlap misses contradictions like "drinks tea" vs "switched to coffee". We also retry empty reconcile replies and run a supersession guard when ADD is proposed against a near neighbour — otherwise a flaky resolve silently ADDs and leaves both facts active.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="n">RESOLVE_PROMPT</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">You reconcile a new candidate fact with existing memories.</span>
+
+<span class="s2">Return ONLY a JSON object with keys:</span>
+<span class="s2">  &quot;op&quot;: one of &quot;ADD&quot;, &quot;UPDATE&quot;, &quot;DELETE&quot;, &quot;NOOP&quot;</span>
+<span class="s2">  &quot;target_id&quot;: string or null  (required for UPDATE/DELETE — must be an id from the neighbour list)</span>
+<span class="s2">  &quot;reason&quot;: short string</span>
+
+<span class="s2">Meanings:</span>
+<span class="s2">- NOOP: candidate already entailed by an existing memory.</span>
+<span class="s2">- UPDATE: candidate refines an existing memory — we tombstone target_id then ADD the refined fact (prior wording kept for audit).</span>
+<span class="s2">- DELETE: candidate contradicts target_id — same apply path: tombstone target_id then ADD the candidate.</span>
+<span class="s2">- ADD: genuinely new (orthogonal to all neighbours).</span>
+
+<span class="s2">Hard rules:</span>
+<span class="s2">- Mutually exclusive preferences MUST supersede (UPDATE or DELETE), never ADD alongside.</span>
+<span class="s2">  Examples: tea vs coffee, city A vs city B, aisle vs window seat.</span>
+<span class="s2">- If similarity is high and the topic matches, prefer DELETE/UPDATE over ADD.</span>
+<span class="s2">- Never invent a target_id; copy an id exactly from the neighbour list.</span>
+
+<span class="s2">Candidate:</span>
+<span class="si">{candidate}</span>
+
+<span class="s2">Existing neighbours (id :: similarity :: text):</span>
+<span class="si">{neighbours}</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_same_memory_slot</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Heuristic: do two facts claim competing values for the same attribute?&quot;&quot;&quot;</span>
+    <span class="n">slots</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;beverage&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;tea&quot;</span><span class="p">,</span> <span class="s2">&quot;coffee&quot;</span><span class="p">,</span> <span class="s2">&quot;latte&quot;</span><span class="p">,</span> <span class="s2">&quot;espresso&quot;</span><span class="p">,</span> <span class="s2">&quot;matcha&quot;</span><span class="p">,</span> <span class="s2">&quot;chai&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;city&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;live&quot;</span><span class="p">,</span> <span class="s2">&quot;lives&quot;</span><span class="p">,</span> <span class="s2">&quot;living&quot;</span><span class="p">,</span> <span class="s2">&quot;moved&quot;</span><span class="p">,</span> <span class="s2">&quot;reside&quot;</span><span class="p">,</span> <span class="s2">&quot;resides&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;seat&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;aisle&quot;</span><span class="p">,</span> <span class="s2">&quot;window&quot;</span><span class="p">,</span> <span class="s2">&quot;middle&quot;</span><span class="p">,</span> <span class="s2">&quot;seat&quot;</span><span class="p">,</span> <span class="s2">&quot;seats&quot;</span><span class="p">},</span>
+        <span class="s2">&quot;diet&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;vegetarian&quot;</span><span class="p">,</span> <span class="s2">&quot;vegan&quot;</span><span class="p">,</span> <span class="s2">&quot;pescatarian&quot;</span><span class="p">,</span> <span class="s2">&quot;allergy&quot;</span><span class="p">,</span> <span class="s2">&quot;allergic&quot;</span><span class="p">},</span>
+    <span class="p">}</span>
+    <span class="n">al</span><span class="p">,</span> <span class="n">bl</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">b</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">words</span> <span class="ow">in</span> <span class="n">slots</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">w</span> <span class="ow">in</span> <span class="n">al</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">words</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">w</span> <span class="ow">in</span> <span class="n">bl</span> <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">words</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_resolve</span><span class="p">(</span><span class="n">raw</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">parse_json_payload</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;op&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;op&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;op&quot;</span><span class="p">,</span> <span class="s2">&quot;ADD&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">tid</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target_id&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;target_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">tid</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">data</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">resolve</span><span class="p">(</span><span class="n">candidate</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scored_neighbours</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">scored_neighbours</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;ADD&quot;</span><span class="p">,</span> <span class="s2">&quot;target_id&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="s2">&quot;no neighbours&quot;</span><span class="p">}</span>
+    <span class="n">rendered</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> :: </span><span class="si">{</span><span class="n">score</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2"> :: </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">score</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">scored_neighbours</span>
+    <span class="p">)</span>
+    <span class="n">prompt</span> <span class="o">=</span> <span class="n">RESOLVE_PROMPT</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">candidate</span><span class="o">=</span><span class="n">candidate</span><span class="p">,</span> <span class="n">neighbours</span><span class="o">=</span><span class="n">rendered</span><span class="p">)</span>
+    <span class="c1"># gpt-oss spends many tokens on hidden reasoning; keep max_tokens high and retry.</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="n">raw</span> <span class="o">=</span> <span class="n">complete</span><span class="p">(</span><span class="n">prompt</span><span class="p">,</span> <span class="n">max_tokens</span><span class="o">=</span><span class="mi">1024</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">parse_resolve</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;retrying </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;ADD&quot;</span><span class="p">,</span> <span class="s2">&quot;target_id&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="s2">&quot;parse-fallback&quot;</span><span class="p">}</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_match_target</span><span class="p">(</span><span class="n">target_id</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">neighbours</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">target_id</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">ids</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">neighbours</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">target_id</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">target_id</span>
+    <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">neighbours</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">target_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">n</span><span class="o">.</span><span class="n">id</span><span class="p">)</span> <span class="ow">or</span> <span class="n">n</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">target_id</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">n</span><span class="o">.</span><span class="n">id</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">write_memory</span><span class="p">(</span><span class="n">turn</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">user_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Ada&quot;</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Full write-policy: log → extract → salience → reconcile → apply.&quot;&quot;&quot;</span>
+    <span class="n">append_log</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;turn&quot;</span><span class="p">:</span> <span class="n">turn</span><span class="p">,</span> <span class="s2">&quot;user&quot;</span><span class="p">:</span> <span class="n">user_name</span><span class="p">})</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="n">extract_facts</span><span class="p">(</span><span class="n">turn</span><span class="p">,</span> <span class="n">user_name</span><span class="o">=</span><span class="n">user_name</span><span class="p">)</span>
+    <span class="n">actions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+        <span class="n">fact</span> <span class="o">=</span> <span class="n">candidate</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span>
+        <span class="n">importance</span> <span class="o">=</span> <span class="n">candidate</span><span class="p">[</span><span class="s2">&quot;importance&quot;</span><span class="p">]</span>
+        <span class="n">scored</span> <span class="o">=</span> <span class="n">store</span><span class="o">.</span><span class="n">search_scored</span><span class="p">(</span><span class="n">fact</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="n">neighbours</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">scored</span><span class="p">]</span>
+        <span class="n">decision</span> <span class="o">=</span> <span class="n">resolve</span><span class="p">(</span><span class="n">fact</span><span class="p">,</span> <span class="n">scored</span><span class="p">)</span>
+        <span class="n">op</span> <span class="o">=</span> <span class="n">decision</span><span class="p">[</span><span class="s2">&quot;op&quot;</span><span class="p">]</span>
+        <span class="n">target_id</span> <span class="o">=</span> <span class="n">_match_target</span><span class="p">(</span><span class="n">decision</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;target_id&quot;</span><span class="p">),</span> <span class="n">neighbours</span><span class="p">)</span>
+
+        <span class="c1"># Bind garbled UPDATE/DELETE target ids to the nearest neighbour.</span>
+        <span class="k">if</span> <span class="n">op</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;UPDATE&quot;</span><span class="p">,</span> <span class="s2">&quot;DELETE&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">target_id</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">scored</span><span class="p">:</span>
+            <span class="n">target_id</span> <span class="o">=</span> <span class="n">scored</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">id</span>
+            <span class="n">decision</span><span class="p">[</span><span class="s2">&quot;reason&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">decision</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;reason&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">; bound to nearest neighbour </span><span class="si">{</span><span class="n">target_id</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;; &quot;</span><span class="p">)</span>
+
+        <span class="c1"># Never leave two active facts in the same slot (tea+coffee). Covers empty</span>
+        <span class="c1"># reconcile JSON (parse-fallback) and resolve wrongly choosing ADD.</span>
+        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;ADD&quot;</span> <span class="ow">and</span> <span class="n">scored</span> <span class="ow">and</span> <span class="n">_same_memory_slot</span><span class="p">(</span><span class="n">fact</span><span class="p">,</span> <span class="n">scored</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">text</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;same-slot supersede vs </span><span class="si">{</span><span class="n">scored</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> (sim=</span><span class="si">{</span><span class="n">scored</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="n">best_score</span><span class="p">,</span> <span class="n">best</span> <span class="o">=</span> <span class="n">scored</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">op</span> <span class="o">=</span> <span class="s2">&quot;DELETE&quot;</span>
+            <span class="n">target_id</span> <span class="o">=</span> <span class="n">best</span><span class="o">.</span><span class="n">id</span>
+            <span class="n">decision</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;DELETE&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;target_id&quot;</span><span class="p">:</span> <span class="n">target_id</span><span class="p">,</span>
+                <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;same-slot supersede vs </span><span class="si">{</span><span class="n">best</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2"> (sim=</span><span class="si">{</span><span class="n">best_score</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">); &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;prior=</span><span class="si">{</span><span class="n">decision</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;reason&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">),</span>
+            <span class="p">}</span>
+
+        <span class="k">if</span> <span class="n">op</span> <span class="o">==</span> <span class="s2">&quot;NOOP&quot;</span><span class="p">:</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;fact&quot;</span><span class="p">:</span> <span class="n">fact</span><span class="p">,</span> <span class="s2">&quot;importance&quot;</span><span class="p">:</span> <span class="n">importance</span><span class="p">,</span> <span class="o">**</span><span class="n">decision</span><span class="p">})</span>
+        <span class="k">elif</span> <span class="n">op</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;UPDATE&quot;</span><span class="p">,</span> <span class="s2">&quot;DELETE&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">target_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                <span class="n">target_id</span><span class="p">,</span> <span class="n">fact</span><span class="p">,</span> <span class="n">importance</span><span class="o">=</span><span class="n">importance</span><span class="p">,</span> <span class="n">provenance</span><span class="o">=</span><span class="n">turn</span>
+            <span class="p">)</span>
+            <span class="n">decision</span><span class="p">[</span><span class="s2">&quot;target_id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target_id</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">&quot;fact&quot;</span><span class="p">:</span> <span class="n">fact</span><span class="p">,</span> <span class="s2">&quot;importance&quot;</span><span class="p">:</span> <span class="n">importance</span><span class="p">,</span> <span class="o">**</span><span class="n">decision</span><span class="p">})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">store</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fact</span><span class="p">,</span> <span class="n">importance</span><span class="o">=</span><span class="n">importance</span><span class="p">,</span> <span class="n">provenance</span><span class="o">=</span><span class="n">turn</span><span class="p">)</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;fact&quot;</span><span class="p">:</span> <span class="n">fact</span><span class="p">,</span>
+                    <span class="s2">&quot;importance&quot;</span><span class="p">:</span> <span class="n">importance</span><span class="p">,</span>
+                    <span class="s2">&quot;op&quot;</span><span class="p">:</span> <span class="s2">&quot;ADD&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;target_id&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="n">decision</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;reason&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">),</span>
+                <span class="p">}</span>
+            <span class="p">)</span>
+    <span class="k">return</span> <span class="n">actions</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;write_memory() ready (sync — safe to call from ADK tools).&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>write_memory() ready (sync — safe to call from ADK tools).
+</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="part-c-drive-the-policy-with-an-adk-agent-hot-path-tool">Part C — Drive the policy with an ADK agent (hot-path tool)<a class="headerlink" href="#part-c-drive-the-policy-with-an-adk-agent-hot-path-tool" title="Permanent link">&para;</a></h2>
+<p>The agent talks to the user; a tool triggers consolidation for the latest turn. In production you would usually defer this to a callback / background worker (<strong>write-behind</strong>). We keep it as a tool so the notebook stays interactive.</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="c1"># Shared handle so the tool closes over the latest user text.</span>
+<span class="n">PENDING_TURN</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;text&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">}</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">consolidate_latest_turn</span><span class="p">(</span><span class="n">tool_context</span><span class="p">:</span> <span class="n">ToolContext</span><span class="p">)</span> <span class="o">-&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Run the write-policy on the latest user turn and mirror durable facts into user: state.&quot;&quot;&quot;</span>
+    <span class="n">turn</span> <span class="o">=</span> <span class="n">PENDING_TURN</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">turn</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="s2">&quot;no pending turn&quot;</span><span class="p">}</span>
+    <span class="n">actions</span> <span class="o">=</span> <span class="n">write_memory</span><span class="p">(</span><span class="n">turn</span><span class="p">)</span>
+    <span class="n">active</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">store</span><span class="o">.</span><span class="n">all</span><span class="p">()]</span>
+    <span class="n">tool_context</span><span class="o">.</span><span class="n">state</span><span class="p">[</span><span class="s2">&quot;user:memory_facts&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">active</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;ok&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">actions</span><span class="p">,</span> <span class="s2">&quot;active_facts&quot;</span><span class="p">:</span> <span class="n">active</span><span class="p">}</span>
+
+
+<span class="n">agent</span> <span class="o">=</span> <span class="n">make_agent</span><span class="p">(</span>
+    <span class="n">name</span><span class="o">=</span><span class="s2">&quot;memory_writer&quot;</span><span class="p">,</span>
+    <span class="n">model</span><span class="o">=</span><span class="n">make_model</span><span class="p">(),</span>
+    <span class="n">instruction</span><span class="o">=</span><span class="p">(</span>
+        <span class="s2">&quot;You are a helpful assistant. After acknowledging the user, &quot;</span>
+        <span class="s2">&quot;ALWAYS call consolidate_latest_turn exactly once so durable facts are stored. &quot;</span>
+        <span class="s2">&quot;Then briefly list what changed (ADD/UPDATE/DELETE/NOOP). &quot;</span>
+        <span class="s2">&quot;Do not narrate chain-of-thought; keep the user-visible reply short.&quot;</span>
+    <span class="p">),</span>
+    <span class="n">tools</span><span class="o">=</span><span class="p">[</span><span class="n">consolidate_latest_turn</span><span class="p">],</span>
+<span class="p">)</span>
+<span class="n">runner</span><span class="p">,</span> <span class="n">sessions</span> <span class="o">=</span> <span class="n">make_runner</span><span class="p">(</span><span class="n">agent</span><span class="p">,</span> <span class="n">app_name</span><span class="o">=</span><span class="s2">&quot;lab02_write_policy&quot;</span><span class="p">)</span>
+
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">chat</span><span class="p">(</span><span class="n">user_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">session_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="n">PENDING_TURN</span><span class="p">[</span><span class="s2">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">text</span>
+    <span class="n">reply</span> <span class="o">=</span> <span class="n">run_turn</span><span class="p">(</span><span class="n">runner</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span> <span class="n">session_id</span><span class="o">=</span><span class="n">session_id</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">text</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;User:&quot;</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Agent:&quot;</span><span class="p">,</span> <span class="n">reply</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Store:&quot;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">store</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">include_superseded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">flag</span> <span class="o">=</span> <span class="s2">&quot; [TOMBSTONE]&quot;</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">superseded</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">id</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">f</span><span class="o">.</span><span class="n">text</span><span class="si">}{</span><span class="n">flag</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="mi">60</span><span class="p">)</span>
+
+
+<span class="n">sess</span> <span class="o">=</span> <span class="k">await</span> <span class="n">create_session</span><span class="p">(</span><span class="n">sessions</span><span class="p">,</span> <span class="n">app_name</span><span class="o">=</span><span class="s2">&quot;lab02_write_policy&quot;</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="s2">&quot;ada&quot;</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">chat</span><span class="p">(</span><span class="s2">&quot;ada&quot;</span><span class="p">,</span> <span class="n">sess</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;Hi there, thanks for helping!&quot;</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">chat</span><span class="p">(</span><span class="s2">&quot;ada&quot;</span><span class="p">,</span> <span class="n">sess</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;I drink tea every morning and I live in Austin.&quot;</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">chat</span><span class="p">(</span><span class="s2">&quot;ada&quot;</span><span class="p">,</span> <span class="n">sess</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;Actually I switched to coffee in June 2026 — please remember that.&quot;</span><span class="p">)</span>
+<span class="k">await</span> <span class="n">chat</span><span class="p">(</span><span class="s2">&quot;ada&quot;</span><span class="p">,</span> <span class="n">sess</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;I live in Austin.&quot;</span><span class="p">)</span>  <span class="c1"># should trend toward NOOP</span>
+<span class="k">await</span> <span class="n">chat</span><span class="p">(</span><span class="s2">&quot;ada&quot;</span><span class="p">,</span> <span class="n">sess</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;I&#39;m allergic to peanuts.&quot;</span><span class="p">)</span>  <span class="c1"># should ADD a new fact on allergy to peanuts</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>User: Hi there, thanks for helping!
+Agent: We need to acknowledge user, then call consolidate_latest_turn, then list changes. No other content.Hi! Happy to help.  
+
+Changes: NOOP.
+Store:
+------------------------------------------------------------
+</code>
+</pre>
+</div>
+</div>
+<div class="output_area">
+<div class="output_text output_subarea">
+<pre>
+<code>Loading weights:   0%|          | 0/103 [00:00&lt;?, ?it/s]</code>
+</pre>
+</div>
+</div>
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>User: I drink tea every morning and I live in Austin.
+Agent: We need to call consolidate_latest_turn again to store durable facts. The user gave two facts: "I drink tea every morning" and "I live in Austin". We need to store them as durable facts. The system expects we call consolidate_latest_turn which will process the latest turn and mirror durable facts into user: state. We need to call it with no arguments. Then we need to output short reply and list changes: likely ADD for two facts. So after calling, we need to output "Got it!" and list changes: ADD. Probably "ADD: drink tea every morning, live in Austin". Let's do that.Got it!  
+
+Changes: ADD – “drink tea every morning”, “live in Austin”.
+Store:
+  - 315f3b01: Ada drinks tea every morning
+  - d64098f5: Ada lives in Austin
+------------------------------------------------------------
+User: Actually I switched to coffee in June 2026 — please remember that.
+Agent: We need to update the fact about drinking tea to coffee, with date. So we should UPDATE the fact "Ada drinks tea every morning" to "Ada drinks coffee since June 2026". Also maybe keep the location fact unchanged. So call consolidate_latest_turn again.Understood!  
+
+Changes: DELETE – “drink tea every morning”, ADD – “switched to coffee in June 2026”.
+Store:
+  - d64098f5: Ada lives in Austin
+  - 82fc8636: Ada switched to coffee in June 2026
+  - 315f3b01: Ada drinks tea every morning [TOMBSTONE]
+------------------------------------------------------------
+User: I live in Austin.
+Agent: User repeats "I live in Austin." Already stored. Should be NOOP (maybe duplicate). Need to call consolidate_latest_turn again.Got it.  
+
+Changes: NOOP – “live in Austin”.
+Store:
+  - d64098f5: Ada lives in Austin
+  - 82fc8636: Ada switched to coffee in June 2026
+  - 315f3b01: Ada drinks tea every morning [TOMBSTONE]
+------------------------------------------------------------
+User: I'm allergic to peanuts.
+Agent: We need to call consolidate_latest_turn.Got it!  
+
+Changes: ADD – “allergic to peanuts”.
+Store:
+  - d64098f5: Ada lives in Austin
+  - 82fc8636: Ada switched to coffee in June 2026
+  - 315f3b01: Ada drinks tea every morning [TOMBSTONE]
+  - efa9841d: Ada is allergic to peanuts.
+------------------------------------------------------------
+</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="part-d-inspect-the-append-log-vs-the-recall-store">Part D — Inspect the append-log vs the recall store<a class="headerlink" href="#part-d-inspect-the-append-log-vs-the-recall-store" title="Permanent link">&para;</a></h2>
+<p>The append-log kept every turn. The recall store should be smaller, de-duplicated, honest about supersession, and carry <strong>non-default importances</strong> from the extractor (allergies high, soft prefs nearer the middle).</p>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+
+<div class="highlight"><pre><span></span><code><span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;append-log turns: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">append_log</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">append_log</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="n">row</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">recall store (active): </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">store</span><span class="o">.</span><span class="n">all</span><span class="p">())</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">store</span><span class="o">.</span><span class="n">render_for_prompt</span><span class="p">(</span><span class="n">store</span><span class="o">.</span><span class="n">all</span><span class="p">()))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">recall store (with tombstones): </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">store</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">include_superseded</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">store</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">include_superseded</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+
+<span class="n">active_texts</span> <span class="o">=</span> <span class="s2">&quot; &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">store</span><span class="o">.</span><span class="n">all</span><span class="p">())</span>
+<span class="k">assert</span> <span class="s2">&quot;coffee&quot;</span> <span class="ow">in</span> <span class="n">active_texts</span><span class="p">,</span> <span class="s2">&quot;current preference should mention coffee&quot;</span>
+<span class="k">assert</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="s2">&quot;tea&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">store</span><span class="o">.</span><span class="n">all</span><span class="p">()),</span> <span class="p">(</span>
+    <span class="s2">&quot;superseded tea preference should not remain active (UPDATE/DELETE both tombstone)&quot;</span>
+<span class="p">)</span>
+<span class="c1"># Prior tea wording should remain as a tombstone for audit:</span>
+<span class="n">tombstoned</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">store</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">include_superseded</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">superseded</span><span class="p">]</span>
+<span class="k">assert</span> <span class="nb">any</span><span class="p">(</span><span class="s2">&quot;tea&quot;</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">tombstoned</span><span class="p">),</span> <span class="s2">&quot;tea preference should remain as tombstone history&quot;</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Tombstones present: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tombstoned</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;✓ Write-policy produced a conflict-aware store.&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+</div>
+<div class="output_wrapper">
+<div class="output">
+<div class="output_area">
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>
+<code>append-log turns: 5
+  {'turn': 'Hi there, thanks for helping!', 'user': 'Ada'}
+  {'turn': 'I drink tea every morning and I live in Austin.', 'user': 'Ada'}
+  {'turn': 'Actually I switched to coffee in June 2026 — please remember that.', 'user': 'Ada'}
+  {'turn': 'I live in Austin.', 'user': 'Ada'}
+  {'turn': "I'm allergic to peanuts.", 'user': 'Ada'}
+
+recall store (active): 3
+- (d64098f5) Ada lives in Austin
+- (82fc8636) Ada switched to coffee in June 2026
+- (efa9841d) Ada is allergic to peanuts.
+
+recall store (with tombstones): 4
+{'text': 'Ada lives in Austin', 'id': 'd64098f5', 'importance': 0.6, 'created_at': '2026-07-27T17:48:56.394567+00:00', 'updated_at': '2026-07-27T17:48:56.394577+00:00', 'provenance': 'I drink tea every morning and I live in Austin.', 'superseded': False, 'superseded_by': None, 'superseded_at': None}
+{'text': 'Ada switched to coffee in June 2026', 'id': '82fc8636', 'importance': 0.6, 'created_at': '2026-07-27T17:49:00.233438+00:00', 'updated_at': '2026-07-27T17:49:00.233457+00:00', 'provenance': 'Actually I switched to coffee in June 2026 — please remember that.', 'superseded': False, 'superseded_by': None, 'superseded_at': None}
+{'text': 'Ada drinks tea every morning', 'id': '315f3b01', 'importance': 0.5, 'created_at': '2026-07-27T17:48:41.612083+00:00', 'updated_at': '2026-07-27T17:49:00.233467+00:00', 'provenance': 'I drink tea every morning and I live in Austin.', 'superseded': True, 'superseded_by': '82fc8636', 'superseded_at': '2026-07-27T17:49:00.233467+00:00'}
+{'text': 'Ada is allergic to peanuts.', 'id': 'efa9841d', 'importance': 0.95, 'created_at': '2026-07-27T17:49:05.279242+00:00', 'updated_at': '2026-07-27T17:49:05.279253+00:00', 'provenance': "I'm allergic to peanuts.", 'superseded': False, 'superseded_by': None, 'superseded_at': None}
+
+Tombstones present: 1
+✓ Write-policy produced a conflict-aware store.
+</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered">
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="next-lab">Next lab<a class="headerlink" href="#next-lab" title="Permanent link">&para;</a></h2>
+<p><strong>Lab 03 — Compaction</strong> deals with the <em>working</em> tier: what happens when the live conversation itself no longer fits the window.</p>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      
+        <script src="../../javascripts/mathjax.js"></script>
+      
+        <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+      
+    
+  </body>
+</html>
